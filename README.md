@@ -1,1 +1,1 @@
-# rdvu-solidity
+# Intimate ETH Contracts
