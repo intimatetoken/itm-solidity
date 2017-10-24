@@ -75,15 +75,14 @@ contract TokenSale is OwnedAndDestructible {
 		uint256 assignedSumNew = assignedSum.add(wanted);
 		// ... nothing exploded! good!
 
-		// state updates before transfers
+		// state updates before transfers (best practice, due to malicious fallbacks)
 		assignedMap[addr] = addrNew;
 		assignedSum = assignedSumNew;
-		LogAssignment(msg.sender, addr, numberOfTokens);
 
-		// forward the funds immediately to the owner
-		// https://medium.com/@MyPaoG/explaining-the-dao-exploit-for-beginners-in-solidity-80ee84f0d470 , may not be possible now
-		// but, if .transfer explodes, it isn't our fault, probably an attacker
+		// forward the funds to the owner
 		owner.transfer(msg.value);
+
+		LogAssignment(msg.sender, addr, numberOfTokens);
 	}
 
 	function _withdrawFor (address addr)
