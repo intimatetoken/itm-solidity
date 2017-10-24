@@ -3,10 +3,10 @@ pragma solidity ^0.4.18;
 import "./SafeMath.sol";
 import "./Token.sol";
 
-contract SafelyOwnable {
+contract OwnedAndDestructible {
 	address internal owner;
 
-	function SafelyOwnable () public {
+	function OwnedAndDestructible () external {
 		owner = msg.sender;
 	}
 
@@ -15,12 +15,13 @@ contract SafelyOwnable {
 		_; // ... wrapped function
 	}
 
-	function destroy () onlyOwner public {
+	function destroy () onlyOwner external {
 		selfdestruct(owner);
 	}
 }
 
-contract TokenSale is SafelyOwnable {
+// Destructible in the event that ETH is sent to this contract by `selfdestruct`
+contract TokenSale is OwnedAndDestructible {
 	Token private token;
 
 	// internal state
@@ -44,7 +45,7 @@ contract TokenSale is SafelyOwnable {
 	event Assignment (address indexed from, address indexed to, uint256 tokens);
 
 	// constructor
-	function TokenSale (address addressForTokenContract, uint256 weiPerToken, uint256 endTime) public {
+	function TokenSale (address addressForTokenContract, uint256 weiPerToken, uint256 endTime) external {
 		token = Token(addressForTokenContract);
 
 		WEI_PER_TOKEN = weiPerToken;
@@ -104,10 +105,10 @@ contract TokenSale is SafelyOwnable {
 		token.transfer(owner, count);
 	}
 
-	// functions (public)
-	function () public payable { _buyFor(msg.sender); }
-	function buyFor (address addr) public payable { _buyFor(beneficiary); }
-	function withdraw () public { _withdrawFor(msg.sender); }
-	function withdrawFor (address addr) public { _withdrawFor(addr); }
-	function recover (address addr) public { _recoverFor(addr); }
+	// functions (external)
+	function () external payable { _buyFor(msg.sender); } // XXX: non-simple, >2300 gas
+	function buyFor (address addr) external payable { _buyFor(beneficiary); }
+	function withdraw () external { _withdrawFor(msg.sender); }
+	function withdrawFor (address addr) external { _withdrawFor(addr); }
+	function recover (address addr) external { _recoverFor(addr); }
 }
