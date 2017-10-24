@@ -82,7 +82,7 @@ contract TokenSale is OwnedAndDestructible {
 		// forward the funds to the owner
 		owner.transfer(msg.value);
 
-		LogAssignment(msg.sender, addr, numberOfTokens);
+		LogAssignment(msg.sender, addr, wanted);
 	}
 
 	function _withdrawFor (address addr)
