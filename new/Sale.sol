@@ -96,7 +96,8 @@ contract TokenSale is OwnedAndDestructible {
 
 	// functions (external payable)
 	function () external payable { _buyFor(msg.sender); } // XXX: non-simple, >2300 gas
-	function buyFor (address addr) external payable { _buyFor(beneficiary); }
+	function buy () external payable { _buyFor(msg.sender); }
+	function buyFor (address addr) external payable { _buyFor(addr); }
 
 	// functions (external)
 	function withdraw () external { _withdrawFor(msg.sender); }
