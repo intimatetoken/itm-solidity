@@ -6,7 +6,7 @@ import "./Token.sol";
 contract OwnedAndDestructible {
 	address internal owner;
 
-	function OwnedAndDestructible () external {
+	function OwnedAndDestructible () public {
 		owner = msg.sender;
 	}
 
@@ -43,15 +43,16 @@ contract TokenSale is OwnedAndDestructible {
 	// events
 	event LogAssignment (address indexed from, address indexed to, uint256 tokens);
 
-	// constructor
-	function TokenSale (address addressForTokenContract, uint256 weiPerToken, uint256 endTime) external {
+	// constructor (TODO: verify, only callable once)
+	function TokenSale (address addressForTokenContract, uint256 weiPerToken, uint256 endTime) public {
 		token = Token(addressForTokenContract);
+		assignedSum = 0; // TODO: necessary?
 
 		WEI_PER_TOKEN = weiPerToken;
 		END_TIME = endTime;
 	}
 
-	// TODO: is a circuit breaker required?
+	// TODO: is a circuit breaker required? Yes
 	// functions (private)
 	function _buyFor (address addr)
 		beforeEnd
@@ -60,7 +61,7 @@ contract TokenSale is OwnedAndDestructible {
 	private {
 		// enforce that there _are_ unassigned tokens
 		uint256 available = token.balanceOf(this);
-		require(available > assignedSum)
+		require(available > assignedSum);
 
 		// enforce that there are enough for this sale
 		uint256 wanted = msg.value.div(WEI_PER_TOKEN);
@@ -68,7 +69,7 @@ contract TokenSale is OwnedAndDestructible {
 		require(unassigned >= wanted);
 
 		// add the wanted tokens to any existing balance
-		uint256 addrBalanceOld = assignedMap[addr];
+		uint256 addrBalanceOld = assignedMap[addr]; // if not exists, defaults to zero
 		uint256 addrBalanceNew = addrBalanceOld.add(wanted);
 
 		// add the wanted tokens to the contracts running total
@@ -76,7 +77,7 @@ contract TokenSale is OwnedAndDestructible {
 		// ... nothing exploded! good!
 
 		// state updates before transfers (best practice, due to malicious fallbacks)
-		assignedMap[addr] = addrNew;
+		assignedMap[addr] = addrBalanceNew;
 		assignedSum = assignedSumNew;
 
 		// forward the funds to the owner
