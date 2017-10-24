@@ -52,6 +52,7 @@ contract TokenSale is OwnedAndDestructible {
 		END_TIME = endTime;
 	}
 
+	// TODO: is a circuit breaker required?
 	// functions (private)
 	function _buyFor (address addr)
 		beforeEnd
