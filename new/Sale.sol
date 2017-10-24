@@ -94,9 +94,11 @@ contract TokenSale is OwnedAndDestructible {
 		token.transfer(addr, count); // msg.sender, is it the contract, or is it the existing `msg.sender`, how does carry with that
 	}
 
-	// functions (external)
+	// functions (external payable)
 	function () external payable { _buyFor(msg.sender); } // XXX: non-simple, >2300 gas
 	function buyFor (address addr) external payable { _buyFor(beneficiary); }
+
+	// functions (external)
 	function withdraw () external { _withdrawFor(msg.sender); }
 	function withdrawFor (address addr) external { _withdrawFor(addr); }
 }
