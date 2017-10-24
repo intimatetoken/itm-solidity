@@ -37,7 +37,7 @@ contract TokenSale is OwnedAndDestructible {
 	modifier afterEnd () { require(now >= END_TIME); _; }
 
 	modifier ifIsOKAddress (address a) { require(a != 0x00); _; }
-	modifier ifIsOKValue (uint256 x) { require(x > 0); _; }
+	modifier ifIsOKValue (uint256 x) { require(x >= WEI_PER_TOKEN); _; }
 	modifier ifIsAllocatedTokens (address a) { require(allocatedMap[a] > 0); _; }
 
 	// events
@@ -61,7 +61,7 @@ contract TokenSale is OwnedAndDestructible {
 
 		// enforce that there are enough for this sale
 		uint256 wanted = msg.value.div(WEI_PER_TOKEN);
-		require(wanted > 0);
+		assert(wanted > 0); // should never happen, see ifIsOKValue
 
 		uint256 unallocatedSum = available.sub(allocatedSum);
 		require(unallocatedSum >= wanted);
