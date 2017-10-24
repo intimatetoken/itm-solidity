@@ -25,8 +25,8 @@ contract TokenSale is OwnedAndDestructible {
 	Token private token;
 
 	// internal state
-	mapping(address => uint256) private assignedMap;
-	uint256 private assignedSum = 0;
+	mapping(address => uint256) private allocatedMap;
+	uint256 private allocatedSum = 0;
 
 	// internal constants
 	uint256 private constant END_TIME = 1517454000430; // 'Thu Feb 01 2018 14:00:00 GMT+1100 (AEDT)'
@@ -38,10 +38,10 @@ contract TokenSale is OwnedAndDestructible {
 
 	modifier ifIsOKAddress (address a) { require(a != 0x00); _; }
 	modifier ifIsOKValue (uint256 x) { require(x > 0); _; }
-	modifier ifIsAssignedTokens (address a) { require(assignedMap[a] > 0); _; }
+	modifier ifIsAllocatedTokens (address a) { require(allocatedMap[a] > 0); _; }
 
 	// events
-	event LogAssignment (address indexed from, address indexed to, uint256 tokens);
+	event LogAllocation (address indexed from, address indexed to, uint256 wei, uint256 tokens);
 
 	// constructor (TODO: verify, only callable once)
 	function TokenSale (address addressForTokenContract) public ifIsOKAddress(addressForTokenContract) {
@@ -55,39 +55,42 @@ contract TokenSale is OwnedAndDestructible {
 		ifIsOKAddress(addr) // no unusable addresses
 		ifIsOKValue(msg.value)
 	private {
-		// enforce that there _are_ unassigned tokens
+		// enforce that there remains unallocated tokens
 		uint256 available = token.balanceOf(this);
-		require(available > assignedSum);
+		require(allocatedSum < available); // no over-allocation
 
 		// enforce that there are enough for this sale
 		uint256 wanted = msg.value.div(WEI_PER_TOKEN);
-		uint256 unassigned = available.sub(assignedSum);
-		require(unassigned >= wanted);
+		require(wanted > 0);
+
+		uint256 unallocatedSum = available.sub(allocatedSum);
+		require(unallocatedSum >= wanted);
 
 		// add the wanted tokens to any existing balance
-		uint256 addrBalanceOld = assignedMap[addr]; // if not exists, defaults to zero
+		uint256 addrBalanceOld = allocatedMap[addr]; // if not exists, defaults to zero
 		uint256 addrBalanceNew = addrBalanceOld.add(wanted);
 
 		// add the wanted tokens to the contracts running total
-		uint256 assignedSumNew = assignedSum.add(wanted);
+		uint256 allocatedSumNew = allocatedSum.add(wanted);
+		assert(allocatedSumNew <= available); // should never happen
 		// ... nothing exploded! good!
 
 		// state updates before transfers (best practice, due to malicious fallbacks)
-		assignedMap[addr] = addrBalanceNew;
-		assignedSum = assignedSumNew;
+		allocatedMap[addr] = addrBalanceNew;
+		allocatedSum = allocatedSumNew;
 
 		// forward the funds to the owner
 		owner.transfer(msg.value);
 
-		LogAssignment(msg.sender, addr, wanted);
+		LogAllocation(msg.sender, addr, msg.value, wanted);
 	}
 
 	function _withdrawFor (address addr)
 		afterEnd
-		ifIsAssignedTokens(addr)
+		ifIsallocatedTokens(addr)
 	private {
-		uint256 count = assignedMap[addr];
-		assignedMap[addr] = 0;
+		uint256 count = allocatedMap[addr];
+		allocatedMap[addr] = 0;
 		token.transfer(addr, count); // msg.sender, is it the contract, or is it the existing `msg.sender`, how does carry with that
 	}
 
