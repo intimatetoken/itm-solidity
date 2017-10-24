@@ -42,7 +42,7 @@ contract TokenSale is OwnedAndDestructible {
 	modifier ifIsAssignedTokens (address a) { require(assignedMap[a] > 0); _; }
 
 	// events
-	event Assignment (address indexed from, address indexed to, uint256 tokens);
+	event LogAssignment (address indexed from, address indexed to, uint256 tokens);
 
 	// constructor
 	function TokenSale (address addressForTokenContract, uint256 weiPerToken, uint256 endTime) external {
@@ -78,7 +78,7 @@ contract TokenSale is OwnedAndDestructible {
 		// state updates before transfers
 		assignedMap[addr] = addrNew;
 		assignedSum = assignedSumNew;
-		Assignment(msg.sender, addr, numberOfTokens);
+		LogAssignment(msg.sender, addr, numberOfTokens);
 
 		// forward the funds immediately to the owner
 		// https://medium.com/@MyPaoG/explaining-the-dao-exploit-for-beginners-in-solidity-80ee84f0d470 , may not be possible now
