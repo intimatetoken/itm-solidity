@@ -80,7 +80,8 @@ contract TokenSale is SafelyOwnable {
 		Assignment(msg.sender, addr, numberOfTokens);
 
 		// forward the funds immediately to the owner
-		// if .transfer explodes, it isn't our fault, probably an attacker
+		// https://medium.com/@MyPaoG/explaining-the-dao-exploit-for-beginners-in-solidity-80ee84f0d470 , may not be possible now
+		// but, if .transfer explodes, it isn't our fault, probably an attacker
 		owner.transfer(msg.value);
 	}
 
