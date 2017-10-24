@@ -33,9 +33,8 @@ contract TokenSale is OwnedAndDestructible {
 	uint256 private END_TIME;
 
 	// modifiers
-	modifier beforeEnd () { require(now < endTime); _; } // XXX: `now` can be manipulated by a miner, still ~OK
-	modifier afterEnd () { require(now >= endTime); _; }
-	modifier afterEndAnd1Year { require(now >= (endTime + 365 days)); _; } // +365 days should never overflow
+	modifier beforeEnd () { require(now < END_TIME); _; } // XXX: `now` can be manipulated by a miner, still ~OK
+	modifier afterEnd () { require(now >= END_TIME); _; }
 
 	modifier ifIsOKAddress (address a) { require(a != 0x00); _; }
 	modifier ifIsOKValue (uint256 x) { require(x > 0); _; }
@@ -95,20 +94,9 @@ contract TokenSale is OwnedAndDestructible {
 		token.transfer(addr, count);
 	}
 
-	function _recoverFor (address addr)
-		afterEndAnd1Year
-		onlyOwner
-		ifIsAssignedTokens(addr)
-	private {
-		uint256 count = assignedMap[addr];
-		assignedMap[addr] = 0;
-		token.transfer(owner, count);
-	}
-
 	// functions (external)
 	function () external payable { _buyFor(msg.sender); } // XXX: non-simple, >2300 gas
 	function buyFor (address addr) external payable { _buyFor(beneficiary); }
 	function withdraw () external { _withdrawFor(msg.sender); }
 	function withdrawFor (address addr) external { _withdrawFor(addr); }
-	function recover (address addr) external { _recoverFor(addr); }
 }
