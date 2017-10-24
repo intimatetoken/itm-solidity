@@ -26,11 +26,11 @@ contract TokenSale is OwnedAndDestructible {
 
 	// internal state
 	mapping(address => uint256) private assignedMap;
-	uint256 private assignedSum;
+	uint256 private assignedSum = 0;
 
 	// internal constants
-	uint256 private WEI_PER_TOKEN;
-	uint256 private END_TIME;
+	uint256 private constant END_TIME = 1517454000430; // 'Thu Feb 01 2018 14:00:00 GMT+1100 (AEDT)'
+	uint256 private constant WEI_PER_TOKEN = 1000;
 
 	// modifiers
 	modifier beforeEnd () { require(now < END_TIME); _; } // XXX: `now` can be manipulated by a miner, still ~OK
@@ -44,12 +44,8 @@ contract TokenSale is OwnedAndDestructible {
 	event LogAssignment (address indexed from, address indexed to, uint256 tokens);
 
 	// constructor (TODO: verify, only callable once)
-	function TokenSale (address addressForTokenContract, uint256 weiPerToken, uint256 endTime) public {
+	function TokenSale (address addressForTokenContract) public ifIsOKAddress(addressForTokenContract) {
 		token = Token(addressForTokenContract);
-		assignedSum = 0; // TODO: necessary?
-
-		WEI_PER_TOKEN = weiPerToken;
-		END_TIME = endTime;
 	}
 
 	// TODO: is a circuit breaker required? Yes
@@ -92,7 +88,7 @@ contract TokenSale is OwnedAndDestructible {
 	private {
 		uint256 count = assignedMap[addr];
 		assignedMap[addr] = 0;
-		token.transfer(addr, count);
+		token.transfer(addr, count); // msg.sender, is it the contract, or is it the existing `msg.sender`, how does carry with that
 	}
 
 	// functions (external)
