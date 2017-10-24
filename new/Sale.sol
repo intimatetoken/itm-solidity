@@ -33,7 +33,7 @@ contract TokenSale is OwnedAndDestructible {
 	uint256 private END_TIME;
 
 	// modifiers
-	modifier beforeEnd () { require(now < endTime); _; }
+	modifier beforeEnd () { require(now < endTime); _; } // XXX: `now` can be manipulated by a miner, still ~OK
 	modifier afterEnd () { require(now >= endTime); _; }
 	modifier afterEndAnd1Year { require(now >= (endTime + 365 days)); _; } // +365 days should never overflow
 
