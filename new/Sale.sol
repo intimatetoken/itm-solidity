@@ -3,8 +3,6 @@ pragma solidity 0.4.18;
 import "./SafeMath.sol";
 import "./Token.sol";
 
-using SafeMath for uint256;
-
 // minimal Owner/Destructible,  omits `destroyAndSend` and `transferOwnership`
 contract OwnedAndDestructible {
 	address internal owner;
@@ -25,6 +23,8 @@ contract OwnedAndDestructible {
 
 // Destructible in the event that ETH is sent to this contract via `selfdestruct`, and therefore not forwarded
 contract TokenSale is OwnedAndDestructible {
+	using SafeMath for uint256;
+
 	Token private token;
 
 	// internal state
