@@ -3,6 +3,7 @@ pragma solidity 0.4.18;
 import "./SafeMath.sol";
 import "./Token.sol";
 
+// minimal Owner/Destructible,  omits `destroyAndSend` and `transferOwnership`
 contract OwnedAndDestructible {
 	address internal owner;
 
