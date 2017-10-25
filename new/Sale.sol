@@ -92,7 +92,7 @@ contract TokenSale is OwnedAndDestructible {
 	private {
 		uint256 count = allocatedMap[addr];
 		allocatedMap[addr] = 0;
-		token.transfer(addr, count); // msg.sender, is it the contract, or is it the existing `msg.sender`, how does carry with that
+		token.transfer(addr, count);
 	}
 
 	// functions (external payable)
