@@ -21,7 +21,7 @@ contract OwnedAndDestructible {
 	}
 }
 
-// Destructible in the event that ETH is sent to this contract by `selfdestruct`
+// Destructible in the event that ETH is sent to this contract via `selfdestruct`, and therefore not forwarded
 contract TokenSale is OwnedAndDestructible {
 	Token private token;
 
@@ -44,12 +44,12 @@ contract TokenSale is OwnedAndDestructible {
 	// events
 	event LogAllocation (address indexed from, address indexed to, uint256 wei, uint256 tokens);
 
-	// constructor (TODO: verify, only callable once)
+	// constructor (TODO: verify as only callable once)
 	function TokenSale (address addressForTokenContract) public ifIsOKAddress(addressForTokenContract) {
 		token = Token(addressForTokenContract);
 	}
 
-	// TODO: is a circuit breaker required? Yes
+	// TODO: add circuit breaker
 	// functions (private)
 	function _buyFor (address addr)
 		beforeEnd
