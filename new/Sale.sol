@@ -17,11 +17,13 @@ contract TokenSale is Ownable, Destructible, Pausable {
 
 	// internal constants
 	uint256 private constant END_TIME = 1517454000430; // 'Thu Feb 01 2018 14:00:00 GMT+1100 (AEDT)'
+	uint256 private constant UNLOCK_TIME = 1519873200430; // 'Thu Mar 01 2018 14:00:00 GMT+1100 (AEDT)'
 	uint256 private constant WEI_PER_TOKEN = 1000;
 
 	// modifiers
 	modifier beforeEnd () { require(now < END_TIME); _; } // XXX: `now` can be manipulated by a miner, still ~OK
 	modifier afterEnd () { require(now >= END_TIME); _; }
+  modifier afterUnlock () { require(now >= UNLOCK_TIME); _; }
 
 	modifier ifIsOKAddress (address a) { require(a != address(0)); _; }
 	modifier ifIsOKValue (uint256 x) { require(x >= WEI_PER_TOKEN); _; }
@@ -78,6 +80,7 @@ contract TokenSale is Ownable, Destructible, Pausable {
 	function _claim (address addr)
 		whenNotPaused
 		afterEnd
+    afterUnlock
 		ifIsAllocatedTokens(addr)
 	private {
 		uint256 count = allocatedMap[addr];
