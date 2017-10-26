@@ -23,7 +23,7 @@ contract TokenSale is Ownable, Destructible, Pausable {
 	// modifiers
 	modifier beforeEnd () { require(now < END_TIME); _; } // XXX: `now` can be manipulated by a miner, still ~OK
 	modifier afterEnd () { require(now >= END_TIME); _; }
-  modifier afterUnlock () { require(now >= UNLOCK_TIME); _; }
+	modifier afterUnlock () { require(now >= UNLOCK_TIME); _; }
 
 	modifier ifIsOKAddress (address a) { require(a != address(0)); _; }
 	modifier ifIsOKValue (uint256 x) { require(x >= WEI_PER_TOKEN); _; }
@@ -80,7 +80,7 @@ contract TokenSale is Ownable, Destructible, Pausable {
 	function _claim (address addr)
 		whenNotPaused
 		afterEnd
-    afterUnlock
+		afterUnlock
 		ifIsAllocatedTokens(addr)
 	private {
 		uint256 count = allocatedMap[addr];
