@@ -1,28 +1,13 @@
 pragma solidity 0.4.18;
 
+import "./Ownable.sol";
+import "./Destructible.sol";
+import "./Pausable.sol";
+
 import "./SafeMath.sol";
 import "./Token.sol";
 
-// minimal Owner/Destructible,  omits `destroyAndSend` and `transferOwnership`
-contract OwnedAndDestructible {
-	address internal owner;
-
-	function OwnedAndDestructible () public {
-		owner = msg.sender;
-	}
-
-	modifier onlyOwner () {
-		require(msg.sender == owner);
-		_; // ... wrapped function
-	}
-
-	function destroy () onlyOwner external {
-		selfdestruct(owner);
-	}
-}
-
-// Destructible in the event that ETH is sent to this contract via `selfdestruct`, and therefore not forwarded
-contract TokenSale is OwnedAndDestructible {
+contract TokenSale is Ownable, Destructible, Pausable {
 	using SafeMath for uint256;
 
 	Token private token;
@@ -44,18 +29,20 @@ contract TokenSale is OwnedAndDestructible {
 	modifier ifIsAllocatedTokens (address a) { require(allocatedMap[a] > 0); _; }
 
 	// events
-	event LogAllocation (address indexed from, address indexed to, uint256 wei, uint256 tokens);
+	event LogAllocation (address indexed by, address indexed to, uint256 wei, uint256 tokens);
+	event LogClaim (address indexed by, address indexed to, uint256 tokens);
 
 	// constructor (TODO: verify as only callable once)
 	function TokenSale (address addressForTokenContract) public ifIsOKAddress(addressForTokenContract) {
 		token = Token(addressForTokenContract);
 	}
 
-	// TODO: add circuit breaker
 	// functions (private)
-	function _buyFor (address addr)
+	// @dev ignores msg.sender, assigns msg.value*WEI_PER_TOKEN tokens to `addr`
+	function _assign (address addr)
+		whenNotPaused
 		beforeEnd
-		ifIsOKAddress(addr) // no unusable addresses
+		ifIsOKAddress(addr) // no unspendable allocations
 		ifIsOKValue(msg.value)
 	private {
 		// enforce that there remains unallocated tokens
@@ -88,21 +75,25 @@ contract TokenSale is OwnedAndDestructible {
 		LogAllocation(msg.sender, addr, msg.value, wanted);
 	}
 
-	function _withdrawFor (address addr)
+	// @dev ignores msg.sender, transfers any tokens allocated for addr, to addr
+	function _claim (address addr)
+		whenNotPaused
 		afterEnd
-		ifIsallocatedTokens(addr)
+		ifIsAllocatedTokens(addr)
 	private {
 		uint256 count = allocatedMap[addr];
 		allocatedMap[addr] = 0;
 		token.transfer(addr, count);
+
+		LogClaim(msg.sender, addr, count);
 	}
 
 	// functions (external payable)
-	function () external payable { _buyFor(msg.sender); } // XXX: non-simple, >2300 gas
-	function buy () external payable { _buyFor(msg.sender); }
-	function buyFor (address addr) external payable { _buyFor(addr); }
+	function () external payable { _assign(msg.sender); } // XXX: non-simple, >2300 gas
+	function buy () external payable { _assign(msg.sender); }
+	function buyFor (address addr) external payable { _assign(addr); }
 
 	// functions (external)
-	function withdraw () external { _withdrawFor(msg.sender); }
-	function withdrawFor (address addr) external { _withdrawFor(addr); }
+	function withdraw () external { _claim(msg.sender); }
+	function withdrawFor (address addr) external { _claim(addr); }
 }
