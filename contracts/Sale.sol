@@ -7,7 +7,7 @@ import "../lib/Pausable.sol";
 import "../lib/SafeMath.sol";
 import "./Token.sol";
 
-contract IndustrySale is Ownable, Destructible, Pausable {
+contract Sale is Ownable, Destructible, Pausable {
     using SafeMath for uint256;
 
     // internal state
@@ -34,7 +34,7 @@ contract IndustrySale is Ownable, Destructible, Pausable {
     event LogClaim (address indexed by, address indexed to, uint256 tokens);
 
     // constructor (TODO: verify as only callable once)
-    function IndustrySale (address tokenAddr) public ifIsOKAddress(tokenAddr) {
+    function Sale (address tokenAddr) public ifIsOKAddress(tokenAddr) {
         token = Token(tokenAddr);
     }
 
