@@ -2,17 +2,21 @@ pragma solidity 0.4.18;
 
 import "./SafeMath.sol";
 
+// see https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20-token-standard.md
 contract Token {
 	using SafeMath for uint256;
 
+	// internal state
+	mapping (address => uint256) private balances;
+	mapping (address => mapping (address => uint256)) private allowed;
+
+	// internal constants
+	// XXX: Solidity creates constant functions () for these constants
 	string public constant name = "Intimate Token";
 	uint8 public constant decimals = 0;
 	string public constant symbol = "ITM";
 	string public constant version = '1.0';
 	uint256 public constant totalSupply = 100,000,000;
-
-	mapping (address => uint256) private balances;
-	mapping (address => mapping (address => uint256)) private allowed;
 
 	event Transfer (address indexed from, address indexed to, uint256 value);
 	event Approval (address indexed owner, address indexed spender, uint256 value)
@@ -23,7 +27,7 @@ contract Token {
 	}
 
 	// see https://github.com/OpenZeppelin/zeppelin-solidity/blob/8e01dd14f9211239213ae7bd4c6af92dd18d4ab7/contracts/token/BasicToken.sol#L22
-	function transfer(address _to, uint256 _value) public returns (bool) {
+	function transfer (address _to, uint256 _value) public returns (bool) {
 		require(_to != address(0));
 		require(_value <= balances[msg.sender]);
 
@@ -34,7 +38,7 @@ contract Token {
 		return true;
 	}
 
-	function balanceOf(address _owner) public constant returns (uint256 balance) {
+	function balanceOf (address _owner) public constant returns (uint256 balance) {
 		return balances[_owner];
 	}
 

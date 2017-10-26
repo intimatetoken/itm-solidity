@@ -82,7 +82,7 @@ contract TokenSale is Ownable, Destructible, Pausable {
 	private {
 		uint256 count = allocatedMap[addr];
 		allocatedMap[addr] = 0;
-		token.transfer(addr, count);
+		assert(token.transfer(addr, count));
 
 		LogClaim(msg.sender, addr, count);
 	}
