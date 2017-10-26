@@ -1,13 +1,13 @@
 pragma solidity 0.4.18;
 
-import "./Ownable.sol";
-import "./Destructible.sol";
-import "./Pausable.sol";
+import "../lib/Ownable.sol";
+import "../lib/Destructible.sol";
+import "../lib/Pausable.sol";
 
-import "./SafeMath.sol";
+import "../lib/SafeMath.sol";
 import "./Token.sol";
 
-contract TokenSale is Ownable, Destructible, Pausable {
+contract IndustrySale is Ownable, Destructible, Pausable {
 	using SafeMath for uint256;
 
 	// internal state
@@ -34,7 +34,7 @@ contract TokenSale is Ownable, Destructible, Pausable {
 	event LogClaim (address indexed by, address indexed to, uint256 tokens);
 
 	// constructor (TODO: verify as only callable once)
-	function TokenSale (address tokenAddr) public ifIsOKAddress(tokenAddr) {
+	function IndustrySale (address tokenAddr) public ifIsOKAddress(tokenAddr) {
 		token = Token(tokenAddr);
 	}
 

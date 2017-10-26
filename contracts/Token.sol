@@ -1,6 +1,6 @@
 pragma solidity 0.4.18;
 
-import "./SafeMath.sol";
+import "../lib/SafeMath.sol";
 
 // see https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20-token-standard.md
 contract Token {
