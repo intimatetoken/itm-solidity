@@ -16,14 +16,14 @@ contract Token {
 	uint8 public constant decimals = 0;
 	string public constant symbol = "ITM";
 	string public constant version = '1.0';
-	uint256 public constant totalSupply = 100,000,000;
+	uint256 public constant totalSupply = 100000000;
 
 	event Transfer (address indexed from, address indexed to, uint256 value);
-	event Approval (address indexed owner, address indexed spender, uint256 value)
+	event Approval (address indexed owner, address indexed spender, uint256 value);
 
 	function Token () public {
-		balances[msg.sender] = TOTAL_SUPPLY;
-		Transfer(0x0, msg.sender, TOTAL_SUPPLY);
+		balances[msg.sender] = totalSupply;
+		Transfer(0x0, msg.sender, totalSupply);
 	}
 
 	// see https://github.com/OpenZeppelin/zeppelin-solidity/blob/8e01dd14f9211239213ae7bd4c6af92dd18d4ab7/contracts/token/BasicToken.sol#L22

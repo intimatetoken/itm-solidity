@@ -30,7 +30,7 @@ contract TokenSale is Ownable, Destructible, Pausable {
 	modifier ifIsAllocatedTokens (address a) { require(allocatedMap[a] > 0); _; }
 
 	// events
-	event LogAllocation (address indexed by, address indexed to, uint256 wei, uint256 tokens);
+	event LogAllocation (address indexed by, address indexed to, uint256 value, uint256 tokens);
 	event LogClaim (address indexed by, address indexed to, uint256 tokens);
 
 	// constructor (TODO: verify as only callable once)
