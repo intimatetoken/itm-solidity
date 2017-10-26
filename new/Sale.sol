@@ -10,9 +10,8 @@ import "./Token.sol";
 contract TokenSale is Ownable, Destructible, Pausable {
 	using SafeMath for uint256;
 
-	Token private token;
-
 	// internal state
+	Token private token;
 	mapping(address => uint256) private allocatedMap;
 	uint256 private allocatedSum = 0;
 
@@ -24,7 +23,7 @@ contract TokenSale is Ownable, Destructible, Pausable {
 	modifier beforeEnd () { require(now < END_TIME); _; } // XXX: `now` can be manipulated by a miner, still ~OK
 	modifier afterEnd () { require(now >= END_TIME); _; }
 
-	modifier ifIsOKAddress (address a) { require(a != 0x00); _; }
+	modifier ifIsOKAddress (address a) { require(a != address(0)); _; }
 	modifier ifIsOKValue (uint256 x) { require(x >= WEI_PER_TOKEN); _; }
 	modifier ifIsAllocatedTokens (address a) { require(allocatedMap[a] > 0); _; }
 
@@ -33,8 +32,8 @@ contract TokenSale is Ownable, Destructible, Pausable {
 	event LogClaim (address indexed by, address indexed to, uint256 tokens);
 
 	// constructor (TODO: verify as only callable once)
-	function TokenSale (address addressForTokenContract) public ifIsOKAddress(addressForTokenContract) {
-		token = Token(addressForTokenContract);
+	function TokenSale (address tokenAddr) public ifIsOKAddress(tokenAddr) {
+		token = Token(tokenAddr);
 	}
 
 	// functions (private)
