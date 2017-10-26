@@ -5,10 +5,10 @@ import "./SafeMath.sol";
 contract Token {
 	using SafeMath for uint256;
 
-	string public name = "Intimate Token";
-	uint8 public decimals = 0;
-	string public symbol = "ITM";
-	string public version = '1.0';
+	string public constant name = "Intimate Token";
+	uint8 public constant decimals = 0;
+	string public constant symbol = "ITM";
+	string public constant version = '1.0';
 	uint256 public constant totalSupply = 100,000,000;
 
 	mapping (address => uint256) private balances;
