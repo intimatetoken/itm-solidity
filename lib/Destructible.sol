@@ -2,7 +2,7 @@
 // XXX: Destructible constructor changed to not payable
 // XXX: destroy changed to external
 // XXX: destroyAndSend removed
-pragma solidity ^0.4.11;
+pragma solidity 0.4.15;
 
 import "./Ownable.sol";
 

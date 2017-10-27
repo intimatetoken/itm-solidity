@@ -1,4 +1,4 @@
-pragma solidity ^0.4.11;
+pragma solidity 0.4.15;
 
 import "../lib/SafeMath.sol";
 
@@ -12,18 +12,18 @@ contract Token {
 
 	// internal constants
 	// XXX: Solidity creates constant functions () for these constants
-	string public constant name = "Intimate Token";
-	uint8 public constant decimals = 0;
-	string public constant symbol = "ITM";
-	string public constant version = '1.0';
-	uint256 public constant totalSupply = 100000000;
+	string public constant NAME = "Intimate Token";
+	uint8 public constant DECIMALS = 0;
+	string public constant SYMBOL = "ITM";
+	string public constant VERSION = "1.0";
+	uint256 public constant TOTAL_SUPPLY = 100000000;
 
 	event Transfer (address indexed from, address indexed to, uint256 value);
 	event Approval (address indexed owner, address indexed spender, uint256 value);
 
 	function Token () public {
-		balances[msg.sender] = totalSupply;
-		Transfer(0x0, msg.sender, totalSupply);
+		balances[msg.sender] = TOTAL_SUPPLY;
+		Transfer(0x0, msg.sender, TOTAL_SUPPLY);
 	}
 
 	// see https://github.com/OpenZeppelin/zeppelin-solidity/blob/8e01dd14f9211239213ae7bd4c6af92dd18d4ab7/contracts/token/BasicToken.sol#L22

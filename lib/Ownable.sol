@@ -1,7 +1,7 @@
 // see https://raw.githubusercontent.com/OpenZeppelin/zeppelin-solidity/8e01dd14f9211239213ae7bd4c6af92dd18d4ab7/contracts/ownership/Ownable.sol
 // XXX: removed transferOwnership and OwnershipTransferred
 // XXX: owner state changed to internal
-pragma solidity ^0.4.11;
+pragma solidity 0.4.15;
 
 contract Ownable {
   address internal owner;
