@@ -17,7 +17,7 @@ contract Token is Console {
     uint8 public constant DECIMALS = 0;
     string public constant SYMBOL = "ITM";
     string public constant VERSION = "1.0";
-    uint256 public constant TOTAL_SUPPLY = 300000000;
+    uint256 public constant TOTAL_SUPPLY = 400000000;
 
     event Transfer (address indexed from, address indexed to, uint256 value);
     event Approval (address indexed owner, address indexed spender, uint256 value);
@@ -34,8 +34,8 @@ contract Token is Console {
         // require(_value <= balances[msg.sender]);
 
         // SafeMath.sub will throw if there is not enough balance.
-        balances[msg.sender] = balances[msg.sender].sub(_value);
-        balances[_to] = balances[_to].add(_value);
+        balances[msg.sender] -= _value;
+        balances[_to] += _value;
         Transfer(msg.sender, _to, _value);
         return true;
     }

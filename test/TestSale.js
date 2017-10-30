@@ -8,7 +8,8 @@ contract('Sale', function(accounts) {
     let sale = await Sale.deployed()
 
     console.log(token.address)
-    let transfer = await token.transfer.call(sale.address, 40000000, { from: token.address });
+    let transfer = await token.transfer(sale.address, 4, { from: accounts[0] });
+    console.log('transfer', transfer)
 
     // let balance = await token.balanceOf.call(token.address);
     let accountBalance = await token.balanceOf.call(accounts[0]);
@@ -20,7 +21,5 @@ contract('Sale', function(accounts) {
       tokenBalance: tokenBalance.valueOf()
     })
   });
-
-  // @todo put ERC-20 tests here
 
 });
