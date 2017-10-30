@@ -44,6 +44,10 @@ contract Token is Console {
         return balances[_owner];
     }
 
+    function getNow () public constant returns (uint time) {
+        return now;
+    }
+
     // see https://github.com/OpenZeppelin/zeppelin-solidity/blob/8e01dd14f9211239213ae7bd4c6af92dd18d4ab7/contracts/token/StandardToken.sol#L26
     function transferFrom (address _from, address _to, uint256 _value) public returns (bool) {
         require(_to != address(0));
@@ -66,4 +70,5 @@ contract Token is Console {
     function allowance (address _owner, address _spender) public constant returns (uint256 remaining) {
         return allowed[_owner][_spender];
     }
+
 }

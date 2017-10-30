@@ -15,11 +15,13 @@ contract Sale is Ownable, Destructible, Pausable, Console {
     Token private token;
     mapping(address => uint256) private allocatedMap;
     uint256 private allocatedSum = 0;
+    uint256 private noopCount = 0;
 
     // internal constants
-    uint256 private constant END_TIME = 1517454000430; // 'Thu Feb 01 2018 14:00:00 GMT+1100 (AEDT)'
-    uint256 private constant UNLOCK_TIME = 1519873200430; // 'Thu Mar 01 2018 14:00:00 GMT+1100 (AEDT)'
-    uint256 private constant WEI_PER_TOKEN = 1000;
+    uint256 private constant END_TIME = 1517454000; // 'Thu Feb 01 2018 14:00:00 GMT+1100 (AEDT)'
+    uint256 private constant UNLOCK_TIME = 1519873200; // 'Thu Mar 01 2018 14:00:00 GMT+1100 (AEDT)'
+    uint256 private constant WEI_PER_TOKEN = 1.66666e15;
+    // uint256 private constant WEI_PER_TOKEN = 1666666666666667;
 
     // modifiers
     modifier beforeEnd () { require(now < END_TIME); _; } // XXX: `now` can be manipulated by a miner, still ~OK
@@ -31,7 +33,7 @@ contract Sale is Ownable, Destructible, Pausable, Console {
     modifier ifIsAllocatedTokens (address a) { require(allocatedMap[a] > 0); _; }
 
     // events
-    event LogAllocation (address indexed by, address indexed to, uint256 value, uint256 tokens);
+    event LogAllocation (address indexed by, address indexed to, uint256 value, uint256 tokens, uint256 rate);
     event LogClaim (address indexed by, address indexed to, uint256 tokens);
 
     // constructor (TODO: verify as only callable once)
@@ -52,7 +54,7 @@ contract Sale is Ownable, Destructible, Pausable, Console {
         require(allocatedSum < available); // no over-allocation
 
         // enforce that there are enough for this sale
-        uint256 wanted = msg.value.div(WEI_PER_TOKEN);
+        uint256 wanted = msg.value / WEI_PER_TOKEN;
         assert(wanted > 0); // should never happen, see ifIsOKValue
 
         uint256 unallocatedSum = available.sub(allocatedSum);
@@ -74,14 +76,14 @@ contract Sale is Ownable, Destructible, Pausable, Console {
         // forward the funds to the owner
         owner.transfer(msg.value);
 
-        LogAllocation(msg.sender, addr, msg.value, wanted);
+        LogAllocation(msg.sender, addr, msg.value, wanted, WEI_PER_TOKEN);
     }
 
     // @dev ignores msg.sender, transfers any tokens allocated for addr, to addr
     function _claim (address addr)
         whenNotPaused
         afterEnd
-        afterUnlock
+        // afterUnlock
         ifIsAllocatedTokens(addr)
     private {
         uint256 count = allocatedMap[addr];
@@ -89,6 +91,14 @@ contract Sale is Ownable, Destructible, Pausable, Console {
         assert(token.transfer(addr, count));
 
         LogClaim(msg.sender, addr, count);
+    }
+
+    function assignedFor (address _addr) public constant returns (uint256 assigned) {
+        return allocatedMap[_addr];
+    }
+
+    function getNow () public constant returns (uint time) {
+        return now;
     }
 
     // functions (external payable)
@@ -99,4 +109,9 @@ contract Sale is Ownable, Destructible, Pausable, Console {
     // functions (external)
     function withdraw () external { _claim(msg.sender); }
     function withdrawFor (address addr) external { _claim(addr); }
+
+    // test function
+    function noop () external {
+        noopCount += 1;
+    }
 }
