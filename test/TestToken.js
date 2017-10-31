@@ -1,10 +1,21 @@
 var Token = artifacts.require("./Token.sol");
+var Sale = artifacts.require("./Sale.sol");
 
 contract('Token', function(accounts) {
 
   it('should put 100M ITM in the first account', async function() {
-    let instance = await Token.deployed()
-    let balance = await instance.balanceOf.call(accounts[0]);
+    let token = await Token.deployed()
+    let sale = await Sale.deployed()
+
+    console.log('token address', token.address)
+    console.log('now', (await token.getNow.call()).valueOf())
+
+    let balance = await token.balanceOf.call(accounts[0]);
+
+    console.log('owner balance', (await token.balanceOf.call(accounts[0])).valueOf())
+    console.log('buyer balance', (await token.balanceOf.call(accounts[1])).valueOf())
+    console.log('token balance', (await token.balanceOf.call(token.address)).valueOf())
+    console.log('sale balance', (await token.balanceOf.call(sale.address)).valueOf())
 
     assert.equal(balance.valueOf(), 100000000, "100000000 wasn't in the first account");
   });

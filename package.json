@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "ethereumjs-testrpc": "^4.1.3"
+  }
+}

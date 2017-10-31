@@ -37,24 +37,25 @@ contract('Sale', async function (accounts) {
 
   it('when enough time passes, can then withdraw it (to themselves)', async function () {
 
-    let now = await sale.getNow.call()
-    console.log('now', now.valueOf())
+    console.log('now', (await token.getNow.call()).valueOf())
+    let time = web3.increaseTime(10563057, (timeAdjustment) => {
+      console.log('time adjusted is ' + timeAdjustment)
+    })
+    await sale.noop()
 
-    let time = web3.evm.increaseTime(10563057, async function () {
+    console.log('buyer before', (await token.balanceOf(buyer)).valueOf())
+    console.log('sale before', (await token.balanceOf(sale.address)).valueOf())
+    console.log('owner before', (await token.balanceOf(owner)).valueOf())
 
-      await sale.noop()
+    let txn = await sale.withdraw({ from: buyer })
 
-      let afterNow = await sale.getNow.call()
-      console.log('after now', afterNow.valueOf())
+    console.log('buyer after', (await token.balanceOf(buyer)).valueOf())
+    console.log('sale after', (await token.balanceOf(sale.address)).valueOf())
+    console.log('owner after', (await token.balanceOf(owner)).valueOf())
 
-      let balanceBefore = await token.balanceOf(buyer)
-      console.log('b before', balanceBefore.valueOf())
+    console.log('token address', token.address)
+    console.log('now at end of sale', (await token.getNow.call()).valueOf())
 
-      let txn = await sale.withdraw({ from: buyer })
-
-      let balanceAfter = await token.balanceOf(buyer)
-      console.log('b after', balanceAfter.valueOf())
-      })
   })
 
-});
+})
