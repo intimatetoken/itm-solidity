@@ -6,6 +6,6 @@ contract TestHelper {
         return now;
     }
 
-    function noop () external { }
+    function noop () external pure { }
 
 }

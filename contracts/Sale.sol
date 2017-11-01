@@ -3,12 +3,11 @@ pragma solidity 0.4.18;
 import "../lib/Ownable.sol";
 import "../lib/Destructible.sol";
 import "../lib/Pausable.sol";
-import "../lib/Console.sol";
 import "../lib/SafeMath.sol";
 
 import "./Token.sol";
 
-contract Sale is Ownable, Destructible, Pausable, Console {
+contract Sale is Ownable, Destructible, Pausable {
     using SafeMath for uint256;
 
     // internal state

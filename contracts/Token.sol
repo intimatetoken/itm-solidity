@@ -1,10 +1,9 @@
 pragma solidity 0.4.18;
 
 import "../lib/SafeMath.sol";
-import "../lib/Console.sol";
 
 // see https://github.com/ethereum/EIPs/blob/master/EIPS/eip-20-token-standard.md
-contract Token is Console {
+contract Token {
     using SafeMath for uint256;
 
     // internal state
