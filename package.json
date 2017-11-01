@@ -1,8 +1,10 @@
 {
   "dependencies": {
+    "bignumber.js": "frozeman/bignumber.js-nolookahead.git",
     "ethereumjs-testrpc": "^4.1.3"
   },
   "devDependencies": {
     "moment": "^2.19.1"
+    "chai-bignumber": "morrislaptop/chai-bignumber#is-big-number",
   }
 }
