@@ -19,7 +19,8 @@ contract('Token', function(accounts) {
     // console.log('token balance', (await token.balanceOf.call(token.address)).valueOf())
     // console.log('sale balance', (await token.balanceOf.call(sale.address)).valueOf())
 
-    assert.equal(balance.valueOf(), 100000000, "100000000 wasn't in the first account");
+    // assert.equal(balance.valueOf(), 100000000, "100000000 wasn't in the first account");
+    balance.should.be.bignumber.equal(100000000)
   });
 
   // @todo put ERC-20 tests here

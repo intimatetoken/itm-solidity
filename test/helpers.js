@@ -2,6 +2,7 @@ const Sale = artifacts.require("./Sale.sol")
 const Token = artifacts.require("./Token.sol")
 const TestHelper = artifacts.require("./TestHelper.sol")
 
+const bluebird = require('bluebird')
 const moment = require('moment')
 
 let helper
@@ -12,7 +13,7 @@ exports.init = async function (owner) {
 
   helper = await TestHelper.deployed()
 
-  let transfer = await token.transfer(sale.address, 400000, { from: owner });
+  let transfer = await token.transfer(sale.address, 40000000, { from: owner });
 
   return {
     token,
@@ -32,6 +33,10 @@ exports.setTime = async function (_dateTime) {
 
   web3.increaseTime(diff)
   await helper.noop() // force mine a block to set the time
+}
+
+exports.getBalance = async function (addr) {
+  return bluebird.promisify(web3.eth.getBalance)(addr)
 }
 
 // web3._extend({
