@@ -17,15 +17,14 @@ contract Token is Console {
     uint8 public constant DECIMALS = 0;
     string public constant SYMBOL = "ITM";
     string public constant VERSION = "1.0";
-    uint256 public constant TOTAL_SUPPLY = 400000000;
+    uint256 public constant TOTAL_SUPPLY = 100000000;
 
     event Transfer (address indexed from, address indexed to, uint256 value);
     event Approval (address indexed owner, address indexed spender, uint256 value);
 
     function Token () public {
         balances[msg.sender] = TOTAL_SUPPLY;
-        log("Hello", uint(1));
-        // Transfer(0x0, msg.sender, TOTAL_SUPPLY);
+        Transfer(0x0, msg.sender, TOTAL_SUPPLY);
     }
 
     // see https://github.com/OpenZeppelin/zeppelin-solidity/blob/8e01dd14f9211239213ae7bd4c6af92dd18d4ab7/contracts/token/BasicToken.sol#L22
@@ -42,10 +41,6 @@ contract Token is Console {
 
     function balanceOf (address _owner) public constant returns (uint256 balance) {
         return balances[_owner];
-    }
-
-    function getNow () public constant returns (uint time) {
-        return now;
     }
 
     // see https://github.com/OpenZeppelin/zeppelin-solidity/blob/8e01dd14f9211239213ae7bd4c6af92dd18d4ab7/contracts/token/StandardToken.sol#L26

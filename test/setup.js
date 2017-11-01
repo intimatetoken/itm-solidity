@@ -1,16 +1,19 @@
 var Sale = artifacts.require("./Sale.sol")
 var Token = artifacts.require("./Token.sol")
+var TestHelper = artifacts.require("./TestHelper.sol")
 
 module.exports = async function (owner) {
   let token = await Token.deployed()
   let sale = await Sale.deployed()
+  let helper = await TestHelper.deployed()
 
   let transfer = await token.transfer(sale.address, 400000, { from: owner });
 
   return {
     token,
     sale,
-    transfer
+    transfer,
+    helper
   }
 }
 
@@ -26,7 +29,7 @@ module.exports = async function (owner) {
 //   ]
 // })
 
-web3.increaseTime = function (seconds, callback) {
+web3.increaseTime = function (seconds, callback = () => {}) {
   web3.currentProvider.sendAsync({
     jsonrpc: "2.0",
     method: "evm_increaseTime",

@@ -1,14 +1,16 @@
 var Token = artifacts.require("./Token.sol");
 var Sale = artifacts.require("./Sale.sol");
+var TestHelper = artifacts.require("./TestHelper.sol");
 
 contract('Token', function(accounts) {
 
   it('should put 100M ITM in the first account', async function() {
     let token = await Token.deployed()
     let sale = await Sale.deployed()
+    let helper = await TestHelper.deployed()
 
     console.log('token address', token.address)
-    console.log('now', (await token.getNow.call()).valueOf())
+    console.log('now', (await helper.getNow.call()).valueOf())
 
     let balance = await token.balanceOf.call(accounts[0]);
 

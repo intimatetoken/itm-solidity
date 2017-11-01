@@ -97,10 +97,6 @@ contract Sale is Ownable, Destructible, Pausable, Console {
         return allocatedMap[_addr];
     }
 
-    function getNow () public constant returns (uint time) {
-        return now;
-    }
-
     // functions (external payable)
     function () external payable { _assign(msg.sender); } // XXX: non-simple, >2300 gas
     function buy () external payable { _assign(msg.sender); }
@@ -110,8 +106,4 @@ contract Sale is Ownable, Destructible, Pausable, Console {
     function withdraw () external { _claim(msg.sender); }
     function withdrawFor (address addr) external { _claim(addr); }
 
-    // test function
-    function noop () external {
-        noopCount += 1;
-    }
 }
