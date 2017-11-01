@@ -1,4 +1,4 @@
-const setup = require('./setup')
+const helpers = require('./helpers')
 
 /**
  * A user sends 10 ETH to the contract address, it uses the fallback function,
@@ -13,7 +13,7 @@ contract('Sale', async function (accounts) {
     owner = accounts[0]
     buyer = accounts[1]
 
-    let obj = await setup(owner)
+    let obj = await helpers.init(owner)
     token = obj.token
     sale = obj.sale
     helper = obj.helper
@@ -33,8 +33,8 @@ contract('Sale', async function (accounts) {
   })
 
   it('when enough time passes, can then withdraw it (to themselves)', async function () {
-    let time = web3.increaseTime(10563057)
-    await helper.noop()
+    await helpers.setTime('2018-03-01 14:00:00+11')
+
     let txn = await sale.withdraw({ from: buyer })
   })
 

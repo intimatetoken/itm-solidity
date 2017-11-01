@@ -1,5 +1,8 @@
 {
   "dependencies": {
     "ethereumjs-testrpc": "^4.1.3"
+  },
+  "devDependencies": {
+    "moment": "^2.19.1"
   }
 }

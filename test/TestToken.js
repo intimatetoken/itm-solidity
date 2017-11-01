@@ -9,15 +9,15 @@ contract('Token', function(accounts) {
     let sale = await Sale.deployed()
     let helper = await TestHelper.deployed()
 
-    console.log('token address', token.address)
-    console.log('now', (await helper.getNow.call()).valueOf())
+    // console.log('token address', token.address)
+    // console.log('now', (await helper.getNow.call()).valueOf())
 
     let balance = await token.balanceOf.call(accounts[0]);
 
-    console.log('owner balance', (await token.balanceOf.call(accounts[0])).valueOf())
-    console.log('buyer balance', (await token.balanceOf.call(accounts[1])).valueOf())
-    console.log('token balance', (await token.balanceOf.call(token.address)).valueOf())
-    console.log('sale balance', (await token.balanceOf.call(sale.address)).valueOf())
+    // console.log('owner balance', (await token.balanceOf.call(accounts[0])).valueOf())
+    // console.log('buyer balance', (await token.balanceOf.call(accounts[1])).valueOf())
+    // console.log('token balance', (await token.balanceOf.call(token.address)).valueOf())
+    // console.log('sale balance', (await token.balanceOf.call(sale.address)).valueOf())
 
     assert.equal(balance.valueOf(), 100000000, "100000000 wasn't in the first account");
   });

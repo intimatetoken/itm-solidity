@@ -1,11 +1,16 @@
-var Sale = artifacts.require("./Sale.sol")
-var Token = artifacts.require("./Token.sol")
-var TestHelper = artifacts.require("./TestHelper.sol")
+const Sale = artifacts.require("./Sale.sol")
+const Token = artifacts.require("./Token.sol")
+const TestHelper = artifacts.require("./TestHelper.sol")
 
-module.exports = async function (owner) {
+const moment = require('moment')
+
+let helper
+
+exports.init = async function (owner) {
   let token = await Token.deployed()
   let sale = await Sale.deployed()
-  let helper = await TestHelper.deployed()
+
+  helper = await TestHelper.deployed()
 
   let transfer = await token.transfer(sale.address, 400000, { from: owner });
 
@@ -15,6 +20,18 @@ module.exports = async function (owner) {
     transfer,
     helper
   }
+}
+
+exports.setTime = async function (_dateTime) {
+  let dateTime = moment.isMoment(_dateTime) ? _dateTime : moment(_dateTime)
+  let currentTime = moment.unix(await helper.getNow.call())
+
+  let diff = (dateTime - currentTime) / 1000
+
+  if ( diff < 0 ) throw new Error('Impossible to go back in time with the chain')
+
+  web3.increaseTime(diff)
+  await helper.noop() // force mine a block to set the time
 }
 
 // web3._extend({
