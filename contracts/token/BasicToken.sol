@@ -123,7 +123,7 @@ contract BasicToken is IERC20Basic, TokenLedger, BasicTokenStorage, Pausable {
              balances[_tos[i]] = balances[_tos[i]] + currentValue;
 
              /// _tos[i] might be a completely new address, so check and store if so
-             /// If there is no need to track which addresses own this token, comment the next libe out
+             /// If there is no need to track which addresses own this token, comment the next line out
 
              trackAddresses(_tos[i]);
 

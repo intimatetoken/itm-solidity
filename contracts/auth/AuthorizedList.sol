@@ -16,7 +16,7 @@ contract AuthorizedList {
     bytes32 constant APHRODITE = keccak256("Goddess of Love!");
     bytes32 constant CUPID = keccak256("Aphrodite's Little Helper.");
     bytes32 constant BULKTRANSFER = keccak256("Bulk Transfer User.");
-    mapping (address => mapping(bytes32 => bool)) authorized;
+    mapping (address => mapping(bytes32 => bool)) internal authorized;
     mapping (bytes32 => bool) internal contractPermissions;
 
 }
