@@ -93,18 +93,18 @@ contract('IntimateShoppe', accounts => {
        var token = await Aphrodite.new();
 
        /// Start sale immediately
-       /// Sale lasts 2 minutes
+       /// Sale lasts 6000000 seconds
        /// The exchange rate is 600 tokens per Ether
-       /// Use Centaur;s address as the beneficiary wallet
-       /// The address of the token thus contract is selling
+       /// Use Centaur's address as the beneficiary wallet
+       /// The address of the token this contract is selling
        /// Token cap is 50% of totalSupply
 
        var shoppe = await IntimateShoppe.new(1, 6000000, 600, aphrodite, token.address, '5e25', 0);
        console.log("IntimateShoppe's address = " + shoppe.address);
 
 
-        // We are approving the token shoppe to spend some tokens in the wallet
-       // which happens to be aphrodite at the moment
+       /// We are approving the token shoppe to spend some tokens in the wallet
+       /// which happens to be aphrodite at the moment
        await token.approve(shoppe.address, '5e25');
 
        console.log("Aphrodite's token balance = " + await token.balanceOf(aphrodite));
