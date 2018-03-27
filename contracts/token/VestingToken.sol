@@ -306,7 +306,6 @@ contract VestingToken is AuthorizedList, Authorized, VestingLedger, StandardToke
 
 
     /// @dev Add a vesting record,m dynamically after the contract gets deployed
-    /// We don't supply the start time, that gets filled from "now"
     /// @param _beneficiary Address to receive vested funds
     /// @param _amount The amount to be vested.
     /// @param _start Starting time or 0 to use "now"
