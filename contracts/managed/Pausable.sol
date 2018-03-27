@@ -28,7 +28,7 @@ contract Pausable is AuthorizedList, Authorized {
   function Pausable() public AuthorizedList() Authorized() { }
 
 
-  /// @dev modifier to allow actions only when the contract IS paused
+  /// @dev modifier to allow actions only when the contract IS NOT paused
 
   modifier whenNotPaused {
 
@@ -38,7 +38,7 @@ contract Pausable is AuthorizedList, Authorized {
   }
 
 
-  /// @dev modifier to allow actions only when the contract IS NOT paused
+  /// @dev modifier to allow actions only when the contract is paused
 
   modifier whenPaused {
 
