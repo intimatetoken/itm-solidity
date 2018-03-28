@@ -95,7 +95,7 @@ contract('IntimateShoppe', accounts => {
        /// Start sale immediately
        /// Sale lasts 6000000 seconds
        /// The exchange rate is 600 tokens per Ether
-       /// Use Centaur's address as the beneficiary wallet
+       /// Use Aphrodite's address as the beneficiary wallet
        /// The address of the token this contract is selling
        /// Token cap is 50% of totalSupply
 
