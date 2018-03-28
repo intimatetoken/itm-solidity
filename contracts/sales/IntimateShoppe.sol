@@ -200,7 +200,7 @@ contract IntimateShoppe is Pausable, RecoverCurrency {
   }
 
 
-  /// @dev Set the cap, i.e. how many token units  we will sell in a round
+  /// @dev Set the cap, i.e. how many token units  we will sell in this round
   /// @param _capTokens How many token units are offered in a round
 
   function setCap(uint256 _capTokens) public ifAuthorized(msg.sender, APHRODITE) {
@@ -256,7 +256,7 @@ contract IntimateShoppe is Pausable, RecoverCurrency {
 
   function () payable public {
 
-    /// Make the value sent is within bounds
+    /// Make certain msg.value sent is within permitted bounds
     require(msg.value >= minValue && msg.value <= maxValue);
     backTokenOwner();
 
@@ -284,7 +284,7 @@ contract IntimateShoppe is Pausable, RecoverCurrency {
 
     /// Transfer purchased tokens to the public buyer
 
-    /// Note that the aadress authorized to control the token contract needs to set "wallet_address" allowance
+    /// Note that the address authorized to control the token contract needs to set "wallet_address" allowance
     /// using ERC20 approve function before this contract can transfer tokens.
    
     if (token.transferFrom(wallet_address, msg.sender, tokens)) {
