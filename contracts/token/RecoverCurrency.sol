@@ -9,34 +9,27 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.21;
 
 import "./IERC20Basic.sol";
 import "../auth/Authorized.sol";
 
 /// @title Authorized account can reclaim ERC20Basic tokens.
-
 contract RecoverCurrency is AuthorizedList, Authorized {
 
-  event Transfer(address indexed _from, address indexed _to, uint256 _value);
+    event Transfer(address indexed _from, address indexed _to, uint256 _value);
 
-  function recoverEther() external ifAuthorized(msg.sender, APHRODITE) {
+    function recoverEther() external ifAuthorized(msg.sender, APHRODITE) {
+        msg.sender.transfer(address(this).balance);
+        emit Transfer(this, msg.sender, address(this).balance);
+    }
 
-    if (msg.sender.call.value(this.balance)())
-       Transfer(this, msg.sender, this.balance);
-
-  }
-
-  /// @dev Reclaim all ERC20Basic compatible tokens
-  /// @param _address The address of the token contract
-   
-  function recoverToken(address _address) external ifAuthorized(msg.sender, APHRODITE) {
-
-    require(_address != address(0));
-    IERC20Basic token = IERC20Basic(_address);
-    uint256 balance = token.balanceOf(address(this));
-    token.transfer(msg.sender, balance);
-
-  }
-
+    /// @dev Reclaim all ERC20Basic compatible tokens
+    /// @param _address The address of the token contract
+    function recoverToken(address _address) external ifAuthorized(msg.sender, APHRODITE) {
+        require(_address != address(0));
+        IERC20Basic token = IERC20Basic(_address);
+        uint256 balance = token.balanceOf(address(this));
+        token.transfer(msg.sender, balance);
+    }
 }

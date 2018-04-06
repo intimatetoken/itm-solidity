@@ -9,69 +9,54 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.21;
 
-import '../auth/Authorized.sol';
+import "../auth/Authorized.sol";
 
 contract Pausable is AuthorizedList, Authorized {
 
-  event Pause();
-  event Unpause();
+    event Pause();
+    event Unpause();
 
 
-  /// @dev We deploy in UNpaused state, should it be paused?
+    /// @dev We deploy in UNpaused state, should it be paused?
+    bool public paused = false;
 
-  bool public paused = false;
-
-  /// Make sure access control is initialized
-
-  function Pausable() public AuthorizedList() Authorized() { }
+    /// Make sure access control is initialized
+    function Pausable() public AuthorizedList() Authorized() { }
 
 
-  /// @dev modifier to allow actions only when the contract IS NOT paused
-
-  modifier whenNotPaused {
-
-    require(!paused);
-    _;
-
-  }
+    /// @dev modifier to allow actions only when the contract IS NOT paused
+    modifier whenNotPaused {
+        require(!paused);
+        _;
+    }
 
 
-  /// @dev modifier to allow actions only when the contract is paused
-
-  modifier whenPaused {
-
-    require(paused);
-    _;
-
-  }
+    /// @dev modifier to allow actions only when the contract is paused
+    modifier whenPaused {
+        require(paused);
+        _;
+    }
 
 
-  /// @dev called by an authorized msg.sender to pause, triggers stopped state
-  /// Multiple addresses may be authorized to call this method
+    /// @dev called by an authorized msg.sender to pause, triggers stopped state
+    /// Multiple addresses may be authorized to call this method
+    function pause() public whenNotPaused ifAuthorized(msg.sender, CUPID) returns (bool) {
+        emit Pause();
+        paused = true;
 
-  function pause() public whenNotPaused ifAuthorized(msg.sender, CUPID) returns (bool) {
-
-    Pause();
-    paused = true;
-
-    return true;
-
-  }
+        return true;
+    }
 
 
-  /// @dev called by an authorized msg.sender to unpause, returns to normal state
-  /// Multiple addresses may be authorized to call this method
-
-  function unpause() public whenPaused ifAuthorized(msg.sender, CUPID) returns (bool) {
-
-    Unpause();
-    paused = false;
+    /// @dev called by an authorized msg.sender to unpause, returns to normal state
+    /// Multiple addresses may be authorized to call this method
+    function unpause() public whenPaused ifAuthorized(msg.sender, CUPID) returns (bool) {
+        emit Unpause();
+        paused = false;
     
-    return true;
-
-  }
-
+        return true;
+    }
 }
 

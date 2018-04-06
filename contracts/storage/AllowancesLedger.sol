@@ -9,10 +9,10 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.21;
 
 contract AllowancesLedger {
 
-  mapping (address => mapping (address => uint256)) public allowances;
+    mapping (address => mapping (address => uint256)) public allowances;
 
 }

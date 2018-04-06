@@ -9,16 +9,16 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.21;
 
-import './IERC20Basic.sol';
+import "./IERC20Basic.sol";
 
 contract IERC20 is IERC20Basic {
 
-  function allowance(address _tokenholder, address _tokenspender) view public returns (uint256);
-  function transferFrom(address _from, address _to, uint256 _value) public returns (bool);
-  function approve(address _tokenspender, uint256 _value) public returns (bool);
-  event Approval(address indexed _tokenholder, address indexed _tokenspender, uint256 _value);
+    function allowance(address _tokenholder, address _tokenspender) view public returns (uint256);
+    function transferFrom(address _from, address _to, uint256 _value) public returns (bool);
+    function approve(address _tokenspender, uint256 _value) public returns (bool);
+    event Approval(address indexed _tokenholder, address indexed _tokenspender, uint256 _value);
 
 }
 

@@ -9,16 +9,15 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.21;
 
-import '../auth/Authorized.sol';
+import "../auth/Authorized.sol";
 
 contract VestingLedger is AuthorizedList, Authorized {
 
     /// It is not an Ethereum compliant address, and can be used only internally
     /// It also means that it is impossible to pull funds from it without going
     /// through the vesting process
-
     address public constant vestingFunds = 0xDeededBabeCafe;
 
     /// Vesting event, which account and how much was vested
@@ -34,7 +33,7 @@ contract VestingLedger is AuthorizedList, Authorized {
                            uint256 _cliff,
                            uint256 _duration,
                            uint256 _tunit
-                         );
+    );
 
 
     struct VestingRecord {
@@ -60,9 +59,7 @@ contract VestingLedger is AuthorizedList, Authorized {
     }
 
     // An array in case we need to loop over all vesting records, which we do need to do.
-    VestingRecord [] internal vestingRecords;
+    VestingRecord[] internal vestingRecords;
 
     mapping (address => uint256) public vestingSchedule;
-
-
 }

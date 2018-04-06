@@ -9,32 +9,26 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.21;
 
-import './AuthorizedList.sol';
+import "./AuthorizedList.sol";
 
 contract Authorized is AuthorizedList {
 
     function Authorized() public {
-
-       /// Set the initial permission for msg.sender (contract creator), it can then add permissions for others
-       authorized[msg.sender][APHRODITE] = true;
-
+        /// Set the initial permission for msg.sender (contract creator), it can then add permissions for others
+        authorized[msg.sender][APHRODITE] = true;
     }
 
     /// Check if _address is authorized to access functionality with _authorization level
     modifier ifAuthorized(address _address, bytes32 _authorization) {
-
-       require(authorized[_address][_authorization] || authorized[_address][APHRODITE]);
-       _;
-
+        require(authorized[_address][_authorization] || authorized[_address][APHRODITE]);
+        _;
     }
 
     /// @dev Check if _address is authorized for _authorization
     function isAuthorized(address _address, bytes32 _authorization) public view returns (bool) {
-
-       return authorized[_address][_authorization];
-
+        return authorized[_address][_authorization];
     }
 
     /// @dev Change authorization for _address 
@@ -42,15 +36,14 @@ contract Authorized is AuthorizedList {
     /// @param _authorization Authority to be changed
     function toggleAuthorization(address _address, bytes32 _authorization) public ifAuthorized(msg.sender, APHRODITE) {
 
-       /// Prevent inadvertent self locking out, cannot change own authority
-       require(_address != msg.sender);
+        /// Prevent inadvertent self locking out, cannot change own authority
+        require(_address != msg.sender);
 
-       /// No need for lower level authorization to linger
-       if (_authorization == APHRODITE && !authorized[_address][APHRODITE]) 
-           authorized[_address][CUPID] = false;
+        /// No need for lower level authorization to linger
+        if (_authorization == APHRODITE && !authorized[_address][APHRODITE]) {
+            authorized[_address][CUPID] = false;
+        }
 
-       authorized[_address][_authorization] = !authorized[_address][_authorization];
-
+        authorized[_address][_authorization] = !authorized[_address][_authorization];
     }
-
 }

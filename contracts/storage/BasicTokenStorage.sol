@@ -9,34 +9,26 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.21;
 
-import '../auth/Authorized.sol';
-import './TokenSettings.sol';
-import './AllowancesLedger.sol';
-import './TokenLedger.sol';
-import './VestingLedger.sol';
+import "../auth/Authorized.sol";
+import "./TokenSettings.sol";
+import "./AllowancesLedger.sol";
+import "./TokenLedger.sol";
+import "./VestingLedger.sol";
 
 /// Collect all the state variables for the token's functions into a single contract
-
 contract BasicTokenStorage is AuthorizedList, Authorized, TokenSettings, AllowancesLedger, TokenLedger, VestingLedger {
 
+    /// @dev Ensure that authorization is set
+    function BasicTokenStorage() public Authorized() TokenSettings() AllowancesLedger() TokenLedger() VestingLedger() { }
 
-  /// @dev Ensure that authorization is set
-
-  function BasicTokenStorage() public Authorized() TokenSettings() AllowancesLedger() TokenLedger() VestingLedger() { }
-
-  /// @dev Keep track of addresses seen before, push new ones into accounts list
-  /// @param _tokenholder address to check for "newness"
-
-  function trackAddresses(address _tokenholder) internal {
-
-    if (!seenBefore[_tokenholder]) {
-        seenBefore[_tokenholder] = true;
-        accounts.push(_tokenholder);
+    /// @dev Keep track of addresses seen before, push new ones into accounts list
+    /// @param _tokenholder address to check for "newness"
+    function trackAddresses(address _tokenholder) internal {
+        if (!seenBefore[_tokenholder]) {
+            seenBefore[_tokenholder] = true;
+            accounts.push(_tokenholder);
+        }
     }
-
-  }
-
-
 }

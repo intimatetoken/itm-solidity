@@ -9,42 +9,33 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.21;
 
-import '../auth/Authorized.sol';
+import "../auth/Authorized.sol";
 
 contract TokenLedger is AuthorizedList, Authorized {
 
-  mapping(address => uint256) public balances;
-  uint256 public totalsupply;
+    mapping(address => uint256) public balances;
+    uint256 public totalsupply;
 
-  // Iterable accounts
-  address[] internal accounts;
-  mapping(address => bool) internal seenBefore;
+    // Iterable accounts
+    address[] internal accounts;
+    mapping(address => bool) internal seenBefore;
 
 
-  /// @dev Keeping track of addresses in an array is useful as mappings are not iterable
-  /// @return Number of addresses holding this token
+    /// @dev Keeping track of addresses in an array is useful as mappings are not iterable
+    /// @return Number of addresses holding this token
+    function numberAccounts() public view ifAuthorized(msg.sender, APHRODITE) returns (uint256) {
+        return accounts.length;
+    }
 
-  function numberAccounts() public view ifAuthorized(msg.sender, APHRODITE) returns (uint256) {
+    /// @dev Keeping track of addresses in an array is useful as mappings are not iterable
+    function returnAccounts() public view ifAuthorized(msg.sender, APHRODITE) returns (address[] holders) {
+        return accounts;
+    }
 
-      return accounts.length;
-
-  }
-
-  /// @dev Keeping track of addresses in an array is useful as mappings are not iterable
-
-  function returnAccounts() public view ifAuthorized(msg.sender, APHRODITE) returns (address[] holders) {
-
-      return accounts;
-
-  }
-
-  function balanceOf(uint256 _id) public view ifAuthorized(msg.sender, CUPID) returns (uint256 balance) {
-
-      require (_id < accounts.length);
-      return balances[accounts[_id]];
-
-  }
-
+    function balanceOf(uint256 _id) public view ifAuthorized(msg.sender, CUPID) returns (uint256 balance) {
+        require (_id < accounts.length);
+        return balances[accounts[_id]];
+    }
 }

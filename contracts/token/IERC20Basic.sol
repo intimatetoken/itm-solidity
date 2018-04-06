@@ -9,15 +9,14 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-pragma solidity ^0.4.18;
-
+pragma solidity ^0.4.21;
 
 contract IERC20Basic {
 
-  function totalSupply() public view returns (uint256);
-  function balanceOf(address _who) public view returns (uint256);
-  function transfer(address _to, uint256 _value) public returns (bool);
-  event Transfer(address indexed _from, address indexed _to, uint256 _value);
+    function totalSupply() public view returns (uint256);
+    function balanceOf(address _who) public view returns (uint256);
+    function transfer(address _to, uint256 _value) public returns (bool);
+    event Transfer(address indexed _from, address indexed _to, uint256 _value);
 
 }
 

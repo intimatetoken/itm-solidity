@@ -9,49 +9,39 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-pragma solidity ^0.4.18;
+pragma solidity ^0.4.21;
 
-import '../auth/Authorized.sol';
+import "../auth/Authorized.sol";
 
 contract TokenSettings is AuthorizedList, Authorized {
 
-  /// These strings should be set temporarily for testing on Rinkeby/Ropsten/Kovan to somethin else
-  /// to avoid people squatting on names
-  /// Change back to "intimate" and "ITM" for mainnet deployment
+    /// These strings should be set temporarily for testing on Rinkeby/Ropsten/Kovan to somethin else
+    /// to avoid people squatting on names
+    /// Change back to "intimate" and "ITM" for mainnet deployment
 
-  string public name = 'intimate';
-  string public symbol = 'ITM';
+    string public name = "intimate";
+    string public symbol = "ITM";
 
-  uint256 public INITIAL_SUPPLY = 100000000  * 10**18;  // 100 million of subdivisible tokens
-  uint8 public decimals = 18;
+    uint256 public INITIAL_SUPPLY = 100000000 * 10**18;  // 100 million of subdivisible tokens
+    uint8 public decimals = 18;
 
 
-  /// @dev Change token name
-  /// @param _name string
+    /// @dev Change token name
+    /// @param _name string
+    function setName(string _name) public ifAuthorized(msg.sender, APHRODITE) {
+        name = _name;
+    }
 
-  function setName(string _name) public ifAuthorized(msg.sender, APHRODITE) {
+    /// @dev Change token symbol
+    /// @param _symbol string
+    function setSymbol(string _symbol) public ifAuthorized(msg.sender, APHRODITE) {
+        symbol = _symbol;
+    }
 
-     name = _name;
-
-  }
-
-  /// @dev Change token symbol
-  /// @param _symbol string
-
-  function setSymbol(string _symbol) public ifAuthorized(msg.sender, APHRODITE) {
-
-     symbol = _symbol;
-
-  }
-
-  /// Not clear if we really need this, maybe should make decimals a constant
-  /// @dev Change token decimal digits
-  /// @param _decimals uint8
-
-  function setDecimals(uint8 _decimals) public ifAuthorized(msg.sender, APHRODITE) {
-
-     decimals = _decimals;
-
-  }
-
+    /// Not clear if we really need this, maybe should make decimals a constant
+    /// @dev Change token decimal digits
+    /// @param _decimals uint8
+    function setDecimals(uint8 _decimals) public ifAuthorized(msg.sender, APHRODITE) {
+        decimals = _decimals;
+    }
 }
