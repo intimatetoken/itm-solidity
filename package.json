@@ -1,0 +1,17 @@
+{
+  "name": "intimate",
+  "version": "1.0.0",
+  "main": "truffle.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Input Strategic Partners",
+  "dependencies": {
+    "babel-register": "^6.26.0",
+    "eth-gas-reporter": "^0.1.1",
+    "mocha": "^5.0.5"
+  }
+}
