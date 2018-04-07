@@ -14,10 +14,11 @@ pragma solidity ^0.4.21;
 import "../math/SafeMath.sol";
 import "./IERC20Basic.sol";
 import "../managed/Pausable.sol";
+import "../managed/Freezable.sol";
 import "../storage/BasicTokenStorage.sol";
 
 
-contract BasicToken is IERC20Basic, TokenLedger, BasicTokenStorage, Pausable {
+contract BasicToken is IERC20Basic, TokenLedger, BasicTokenStorage, Pausable, Freezable {
 
     using SafeMath for uint256;
 
@@ -35,7 +36,7 @@ contract BasicToken is IERC20Basic, TokenLedger, BasicTokenStorage, Pausable {
     /// @dev transfer token for a specified address
     /// @param _to The address to transfer to.
     /// @param _value The amount to be transferred.
-    function transfer(address _to, uint256 _value) public whenNotPaused returns (bool) {
+    function transfer(address _to, uint256 _value) public whenNotPaused notFrozen returns (bool) {
 
         /// No transfers to 0x0 address, use burn instead, if implemented
         require(_to != address(0));
@@ -61,7 +62,7 @@ contract BasicToken is IERC20Basic, TokenLedger, BasicTokenStorage, Pausable {
     /// @dev bulkTransfer tokens to a list of specified addresses, not an ERC20 function
     /// @param _tos The list of addresses to transfer to.
     /// @param _values The list of amounts to be transferred.
-    function bulkTransfer(address[] _tos, uint256[] _values) public whenNotPaused ifAuthorized(msg.sender, BULKTRANSFER) returns (bool) {
+    function bulkTransfer(address[] _tos, uint256[] _values) public whenNotPaused notFrozen ifAuthorized(msg.sender, BULKTRANSFER) returns (bool) {
 
         emit BulkTransfer(msg.sender, _tos.length);
 
@@ -123,6 +124,7 @@ contract BasicToken is IERC20Basic, TokenLedger, BasicTokenStorage, Pausable {
     /// @param _tokenholder Address of interest
     /// @return Balance for the passed address
     function balanceOf(address _tokenholder) public view whenNotPaused returns (uint256 balance) {
+        require(!isFrozen(_tokenholder));
         return balances[_tokenholder];
     }
 }

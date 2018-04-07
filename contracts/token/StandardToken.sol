@@ -14,6 +14,7 @@ pragma solidity ^0.4.21;
 import "../math/SafeMath.sol";
 import "./IERC20.sol";
 import "../managed/Pausable.sol";
+import "../managed/Freezable.sol";
 import "../storage/BasicTokenStorage.sol";
 import "./BasicToken.sol";
 
@@ -33,6 +34,8 @@ contract StandardToken is IERC20Basic, BasicToken, IERC20 {
         // Don't send tokens to 0x0 address, use burn function that updates totalSupply
         // and don't waste gas sending tokens to yourself
         require(_to != address(0) && _from != _to);
+
+        require(!isFrozen(_from) && !isFrozen(_to));
 
         /// This will revert if _value is larger than the allowance
         allowances[_from][msg.sender] = allowances[_from][msg.sender].sub(_value);
@@ -54,9 +57,11 @@ contract StandardToken is IERC20Basic, BasicToken, IERC20 {
     /// @dev Approve the passed address to spend the specified amount of tokens on behalf of msg.sender.
     /// @param _tokenspender The address which will spend the funds.
     /// @param _value The amount of tokens to be spent.
-    function approve(address _tokenspender, uint256 _value) public whenNotPaused returns (bool) {
+    function approve(address _tokenspender, uint256 _value) public whenNotPaused notFrozen returns (bool) {
 
         require(_tokenspender != address(0) && msg.sender != _tokenspender);
+
+        require(!isFrozen(_tokenspender));
 
         /// To mitigate reentrancy race condition, set allowance for _tokenspender to 0
         /// first and then set the new value
@@ -78,6 +83,7 @@ contract StandardToken is IERC20Basic, BasicToken, IERC20 {
     /// @param _tokenspender Account address authorized to transfer tokens
     /// @return Amount of tokens still available to _tokenspender to transfer.
     function allowance(address _tokenholder, address _tokenspender) public view whenNotPaused returns (uint256) {
+        require(!isFrozen(_tokenholder) && !isFrozen(_tokenspender));
         return allowances[_tokenholder][_tokenspender];
     }
 }
