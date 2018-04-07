@@ -14,54 +14,7 @@
 const Aphrodite = artifacts.require('../contracts/Intimate.io/token/Aphrodite.sol');
 const IntimateShoppe = artifacts.require('../contracts/Intimate.io/sales/IntimateShoppe.sol');
 
-//const abi = require('ethereumjs-abi');
-//const fs = require('fs');
-
-const sha3 = require('solidity-sha3').default;
-
-const APHRODITE = sha3('Goddess of Love!');
-const CUPID = sha3('Aphrodite\'s Little Helper.');
-const BULKTRANSFER = sha3('Bulk Transfer User.');
-
-const assertRevert = function(error) {
-  if (error.message.search('revert') == -1) {
-    assert.fail('Call expected to revert; error was ' + error);
-  }
-}
-
-
-const increaseTime = addSeconds => web3.currentProvider.send({ jsonrpc: "2.0", method: "evm_increaseTime", params: [addSeconds], id: 0 })
-
-var vestingFunds = '0xDeededBabeCafe'
-
-
-const mine = () => web3.currentProvider.send({ jsonrpc: "2.0", method: "evm_mine", params: [], id: 0 })
-
-const netid = () => web3.currentProvider.send({ jsonrpc: "2.0", method: "net_version", params: [], id: 67 })
-
-var network = Object()
-// List of addresses
-network["1"] = 0x1    // mainnet address
-network["3"] = 0x2    // ropsten
-network["4"] = 0x3    // rinkeby
-network["42"] = 0x4   // kovan
-
-function getAddressFromNetwork(table) {
-
-    var id = netid()['result']
-
-   if (parseInt(id) > 42)
-      // Testrpc
-      return 0x5
-   return table[id]
-
-}
-
-
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
+const { BULKTRANSFER, increaseTime, assertRevert } = require('../globals');
 
 contract('Aphrodite', accounts => {
 
@@ -83,7 +36,7 @@ contract('Aphrodite', accounts => {
 
     it ('cannot approve whenPaused', async () => {
 
-        var token = await Aphrodite.new();
+        const token = await Aphrodite.new();
 
         console.log("token address = " + token.address);
 
@@ -101,14 +54,14 @@ contract('Aphrodite', accounts => {
 
     it ('can approve && retrive allowance whenNotPaused', async () => {
 
-        var token = await Aphrodite.new();
+        const token = await Aphrodite.new();
 
         console.log("token address = " + token.address);
 
         const tx = await token.approve(cupid, '42000000000000000000');
         assert.notEqual(tx, 0x0);
 
-        var allowed = await token.allowance(aphrodite, cupid);
+        const allowed = await token.allowance(aphrodite, cupid);
 
         console.log("Allowance Aphrodite has given to Cupid = " + allowed.toNumber());
 
@@ -118,7 +71,7 @@ contract('Aphrodite', accounts => {
 
     it ('can approve && transferFrom whenNotPaused', async () => {
 
-        var token = await Aphrodite.new();
+        const token = await Aphrodite.new();
         const vest = (await token.totalVestingSupply()).toNumber();
 
         console.log("token address = " + token.address);
@@ -126,7 +79,7 @@ contract('Aphrodite', accounts => {
         const tx = await token.approve(cupid, '42000000000000000000');
         assert.notEqual(tx, 0x0);
 
-        var allowed = await token.allowance(aphrodite, cupid);
+        const allowed = await token.allowance(aphrodite, cupid);
 
         console.log("Allowance Aphrodite has given to Cupid = " + allowed.toNumber());
 
@@ -142,14 +95,14 @@ contract('Aphrodite', accounts => {
 
     it ('can approve before pause() but not transferFrom whenPaused', async () => {
 
-        var token = await Aphrodite.new();
+        const token = await Aphrodite.new();
 
         console.log("token address = " + token.address);
 
         const tx = await token.approve(human, '2000');
         assert.notEqual(tx, 0x0);
 
-        var allowed = await token.allowance(aphrodite, human);
+        const allowed = await token.allowance(aphrodite, human);
 
         console.log("Allowance Aphrodite has given to Human = " + allowed.toNumber());
 
@@ -168,7 +121,7 @@ contract('Aphrodite', accounts => {
 
     it ('cannot transfer tokens whenPaused', async () => {
 
-        var token = await Aphrodite.new();
+        const token = await Aphrodite.new();
 
         console.log("token address = " + token.address);
 
@@ -178,7 +131,7 @@ contract('Aphrodite', accounts => {
         try {
             const tx = await token.transfer(cupid, '42');
 
-            var bal = (await token.balanceOf(cupid)).toNumber();
+            const bal = (await token.balanceOf(cupid)).toNumber();
 
             console.log("Cupid's balance = " + bal);
 
@@ -192,7 +145,7 @@ contract('Aphrodite', accounts => {
 
     it ('cannot transfer more tokens than balance', async () => {
 
-        var token = await Aphrodite.new();
+        const token = await Aphrodite.new();
 
         console.log("token address = " + token.address);
 
@@ -201,7 +154,7 @@ contract('Aphrodite', accounts => {
         try {
             const tx = await token.transfer(cupid, '1e30');
 
-            var bal = (await token.balanceOf(cupid)).toNumber();
+            const bal = (await token.balanceOf(cupid)).toNumber();
 
             console.log("Cupid's balance = " + bal);
 
@@ -215,7 +168,7 @@ contract('Aphrodite', accounts => {
 
     it ('can transfer tokens whenNotPaused', async () => {
 
-        var token = await Aphrodite.new();
+        const token = await Aphrodite.new();
 
         console.log("token address = " + token.address);
 
@@ -223,7 +176,7 @@ contract('Aphrodite', accounts => {
 
         await token.transfer(cupid, '42');
 
-        var bal = (await token.balanceOf(cupid)).toNumber();
+        const bal = (await token.balanceOf(cupid)).toNumber();
 
         console.log("Cupid's balance = " + bal);
 
@@ -233,15 +186,15 @@ contract('Aphrodite', accounts => {
 
     it('can bulk transfer', async () => {
 
-        var token = await Aphrodite.new();
+        const token = await Aphrodite.new();
 
-        var bal = (await token.balanceOf(aphrodite)).toNumber();
+        let bal = (await token.balanceOf(aphrodite)).toNumber();
         const vest = (await token.totalVestingSupply()).toNumber();
 
         assert.equal(bal + vest, '1e26');
 
-        var addresses = [];
-        var amounts = [];
+        const addresses = [];
+        const amounts = [];
 
         addresses.push(cupid);
         amounts.push(1000);
@@ -265,15 +218,15 @@ contract('Aphrodite', accounts => {
 
     it('With permission a regular user can bulk transfer', async () => {
 
-        var token = await Aphrodite.new();
+        const token = await Aphrodite.new();
 
-        var bal = (await token.balanceOf(aphrodite)).toNumber();
+        let bal = (await token.balanceOf(aphrodite)).toNumber();
         const vest = (await token.totalVestingSupply()).toNumber();
 
         assert.equal(bal + vest, '1e26');
 
-        var addresses = [];
-        var amounts = [];
+        const addresses = [];
+        const amounts = [];
 
         addresses.push(cupid);
         amounts.push(1000);
@@ -304,7 +257,7 @@ contract('Aphrodite', accounts => {
 
     it ('can replace name/symbol && retrieve their values', async () => {
 
-        var token = await Aphrodite.new();
+        const token = await Aphrodite.new();
 
         const name = await token.setName('Venus');
         const symbol = await token.setSymbol('Eros');
@@ -316,7 +269,7 @@ contract('Aphrodite', accounts => {
 
     it ('can retrieve totalSupply and balanceOf', async () => {
 
-        var token = await Aphrodite.new();
+        const token = await Aphrodite.new();
 
         const total = (await token.totalSupply()).toNumber();
         const bal = (await token.balanceOf(aphrodite)).toNumber();
@@ -331,7 +284,7 @@ contract('Aphrodite', accounts => {
 
     it ('can recover lost Ether', async () => {
 
-        var token = await Aphrodite.new();
+        const token = await Aphrodite.new();
         const tx = await web3.eth.sendTransaction({from: aphrodite, to: token.address, value: web3.toWei(1, 'ether')});
         assert.notEqual(tx, 0x0);
 
@@ -347,13 +300,13 @@ contract('Aphrodite', accounts => {
 
     it ('can recover lost Tokens', async () => {
 
-        var token = await Aphrodite.new();
-        var lostToken = await Aphrodite.new();
+        const token = await Aphrodite.new();
+        const lostToken = await Aphrodite.new();
         const vest = (await token.totalVestingSupply()).toNumber();
 
         await lostToken.transfer(token.address, '42000000000');
 
-        var bal = (await lostToken.balanceOf(token.address)).toNumber();
+        const bal = (await lostToken.balanceOf(token.address)).toNumber();
         console.log("Token's balance = " + bal);
 
         console.log((await lostToken.balanceOf(aphrodite)).toString());
@@ -368,42 +321,42 @@ contract('Aphrodite', accounts => {
 
     it ('can vest over time && spend vested tokens', async () => {
 
-        var token = await Aphrodite.new();
+        const token = await Aphrodite.new();
         console.log(await token.returnVestingAddresses());
-        var beneficiaries = await token.returnVestingAddresses();
+        const beneficiaries = await token.returnVestingAddresses();
 
-        var addr = await token.vestingFundsAddress();
+        const addr = await token.vestingFundsAddress();
         console.log("Vesting Funds address = " + addr);
 
-        for (var i = 0; i < beneficiaries.length; i++) {
+        for (let i = 0; i < beneficiaries.length; i++) {
            //console.log("Loop = " + beneficiaries[i]);
            console.log("Loop = " + await token.returnVestingRecord(beneficiaries[i]));
         }
         await token.vest();
-        for (var i = 0; i < beneficiaries.length; i++) {
+        for (let i = 0; i < beneficiaries.length; i++) {
            console.log("Loop = " + await token.allowance(addr, beneficiaries[i]));
         }
         // About 1.5 years
         increaseTime(47304000-48*3600);
         await token.vest();
         
-        for (var i = 0; i < beneficiaries.length; i++) {
+        for (let i = 0; i < beneficiaries.length; i++) {
            console.log("Loop = " + await token.allowance(addr, beneficiaries[i]));
         }
-        for (var j = 0; j < 24; j++) {
+        for (let j = 0; j < 24; j++) {
                 // One(1) month
                 increaseTime(5270400/2);
                 await token.vest();
-                for (var i = 0; i < beneficiaries.length; i++) {
+                for (let i = 0; i < beneficiaries.length; i++) {
                       console.log("Current allowance = " + await token.allowance(addr, beneficiaries[i]));
                 }
         }
         console.log("Total funds for vesting = " + await token.balanceOf(addr));
-        for (var i = 0; i < beneficiaries.length; i++) {
-           var allowed = await token.allowance(addr, beneficiaries[i]);
+        for (let i = 0; i < beneficiaries.length; i++) {
+           const allowed = await token.allowance(addr, beneficiaries[i]);
            await token.transferFrom(addr, beneficiaries[i], allowed.toNumber(), {from: beneficiaries[i]});
         }
-        for (var i = 0; i < beneficiaries.length; i++) {
+        for (let i = 0; i < beneficiaries.length; i++) {
            console.log(beneficiaries[i] + "'s balance = " + await token.balanceOf(beneficiaries[i]));
         }
         console.log("Total funds for vesting post distribution = " + await token.balanceOf(addr));
@@ -413,11 +366,11 @@ contract('Aphrodite', accounts => {
 
     it ('can revoke yet unvested tokens', async () => {
         
-        var token = await Aphrodite.new();
+        const token = await Aphrodite.new();
         console.log("Before revocation = " + await token.returnVestingAddresses());
-        var beneficiaries = await token.returnVestingAddresses();
+        const beneficiaries = await token.returnVestingAddresses();
 
-        var addr = await token.vestingFundsAddress();
+        const addr = await token.vestingFundsAddress();
         await token.revoke(human);
         console.log("After revocation = " + await token.returnVestingAddresses());
         console.log("Total funds for vesting after revocation = " + await token.balanceOf(addr));
@@ -427,11 +380,11 @@ contract('Aphrodite', accounts => {
 
     it ('can create a new vesting record', async () => {
 
-        var token = await Aphrodite.new();
+        const token = await Aphrodite.new();
         console.log("Before vesting record addition = " + await token.returnVestingAddresses());
-        var beneficiaries = await token.returnVestingAddresses();
+        const beneficiaries = await token.returnVestingAddresses();
 
-        var addr = await token.vestingFundsAddress();
+        const addr = await token.vestingFundsAddress();
         await token.addVestingRecord(centaur, 1.2e22, 0, 365*24*3600, 2*365*24*3600, 365*2*3600);
         console.log("After addition = " + await token.returnVestingAddresses());
         console.log("Total funds for vesting after addition = " + await token.balanceOf(addr));
