@@ -17,6 +17,8 @@ module.exports = {
     CUPID: sha3('Aphrodite\'s Little Helper.'),
     BULKTRANSFER: sha3('Bulk Transfer User.'),
 
+    log: () => {},
+
     assertRevert: function (error) {
         if (error.message.search('revert') == -1) {
             assert.fail('Call expected to revert; error was ' + error);

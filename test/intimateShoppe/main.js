@@ -14,7 +14,7 @@
 const Aphrodite = artifacts.require('../contracts/Intimate.io/token/Aphrodite.sol');
 const IntimateShoppe = artifacts.require('../contracts/Intimate.io/sales/IntimateShoppe.sol');
 
-const { CUPID, increaseTime, assertRevert } = require('../globals');
+const { CUPID, increaseTime, assertRevert, log } = require('../globals');
 
 contract('IntimateShoppe', accounts => {
 
@@ -26,8 +26,8 @@ contract('IntimateShoppe', accounts => {
 
     it ('can get Ether balance for accounts', async () => {
 
-       console.log(web3.eth.getBalance(aphrodite).toNumber());
-       console.log(web3.eth.getBalance(cupid).toNumber());
+       log(web3.eth.getBalance(aphrodite).toNumber());
+       log(web3.eth.getBalance(cupid).toNumber());
 
     });
 
@@ -54,27 +54,27 @@ contract('IntimateShoppe', accounts => {
        /// Token cap is 50% of totalSupply
 
        const shoppe = await IntimateShoppe.new(1, 6000000, 600, aphrodite, token.address, '5e25', 0);
-       console.log("IntimateShoppe's address = " + shoppe.address);
+       log("IntimateShoppe's address = " + shoppe.address);
 
 
        /// We are approving the token shoppe to spend some tokens in the wallet
        /// which happens to be aphrodite at the moment
        await token.approve(shoppe.address, '5e25');
 
-       console.log("Aphrodite's token balance = " + await token.balanceOf(aphrodite));
-       console.log("allowance given to Shoppe contract = " + await token.allowance(aphrodite, shoppe.address));
+       log("Aphrodite's token balance = " + await token.balanceOf(aphrodite));
+       log("allowance given to Shoppe contract = " + await token.allowance(aphrodite, shoppe.address));
        assert.equal((await token.allowance(aphrodite, shoppe.address)).toNumber(), '5e25');
 
        const aphroditeBalance = (await web3.eth.getBalance(aphrodite)).toNumber();
-       console.log("wallet balance before = " + aphroditeBalance);
+       log("wallet balance before = " + aphroditeBalance);
 
        const tx = await web3.eth.sendTransaction({gas: 500000, from: human, to: shoppe.address, 
                     value: web3.toWei(3, 'ether')});
        assert.notEqual(tx, 0x0);
-       console.log("Human's ether balance after purchase = " + web3.eth.getBalance(human).toNumber());
+       log("Human's ether balance after purchase = " + web3.eth.getBalance(human).toNumber());
 
        let tokensBought = await token.balanceOf(human);
-       console.log("Human bought ITM tokens = " + tokensBought);
+       log("Human bought ITM tokens = " + tokensBought);
        assert.equal(tokensBought.toNumber(), 600*(web3.toWei(3, 'ether')));
 
        const tx1 = await web3.eth.sendTransaction({gas: 500000, from: centaur, to: shoppe.address, 
@@ -84,18 +84,18 @@ contract('IntimateShoppe', accounts => {
        assert.notEqual(tx1, 0x0);
        assert.notEqual(tx2, 0x0);
 
-       console.log("Centaur's ether balance after purchase = " + web3.eth.getBalance(centaur).toNumber());
+       log("Centaur's ether balance after purchase = " + web3.eth.getBalance(centaur).toNumber());
 
        tokensBought = await token.balanceOf(centaur);
-       console.log("Centaur bought ITM tokens = " + tokensBought);
+       log("Centaur bought ITM tokens = " + tokensBought);
        assert.equal(tokensBought.toNumber(), 600*(web3.toWei(0.75, 'ether')));
 
-       console.log("Accounts list = " + await token.returnAccounts());
+       log("Accounts list = " + await token.returnAccounts());
 
-       console.log("Contract's ether balance after purchase = " + web3.eth.getBalance(shoppe.address).toNumber());
+       log("Contract's ether balance after purchase = " + web3.eth.getBalance(shoppe.address).toNumber());
        assert.equal(web3.eth.getBalance(shoppe.address).toNumber(), web3.toWei(0.75, 'ether'));
 
-       console.log(await shoppe.getContributionsForAddress(centaur));
+       log(await shoppe.getContributionsForAddress(centaur));
 
        /// Make sure that totals for Ether received and tokens sold are correct
        assert.equal((await shoppe.weiRaised()).toNumber(), web3.toWei(3.75, 'ether'));
@@ -108,16 +108,16 @@ contract('IntimateShoppe', accounts => {
        const token = await Aphrodite.new();
 
        const shoppe = await IntimateShoppe.new(3000000, 6000000, 600, aphrodite, token.address, '5e25', 0);
-       console.log("IntimateShoppe's address = " + shoppe.address);
+       log("IntimateShoppe's address = " + shoppe.address);
 
        await token.approve(shoppe.address, '5e25');
 
-       console.log("Aphrodite's token balance = " + await token.balanceOf(aphrodite));
-       console.log("allowance given to Shoppe contract = " + await token.allowance(aphrodite, shoppe.address));
+       log("Aphrodite's token balance = " + await token.balanceOf(aphrodite));
+       log("allowance given to Shoppe contract = " + await token.allowance(aphrodite, shoppe.address));
        assert.equal((await token.allowance(aphrodite, shoppe.address)).toNumber(), '5e25');
 
        const aphroditeBalance = (await web3.eth.getBalance(aphrodite)).toNumber();
-       console.log("wallet balance before = " + aphroditeBalance);
+       log("wallet balance before = " + aphroditeBalance);
 
        try {
            const tx = await web3.eth.sendTransaction({gas: 500000, from: human, to: shoppe.address,
@@ -127,7 +127,7 @@ contract('IntimateShoppe', accounts => {
        } catch (error) {
            assertRevert(error);
        }
-       console.log("Human's ether balance after purchase = " + web3.eth.getBalance(human).toNumber());
+       log("Human's ether balance after purchase = " + web3.eth.getBalance(human).toNumber());
 
 
     });
@@ -137,16 +137,16 @@ contract('IntimateShoppe', accounts => {
        const token = await Aphrodite.new();
 
        const shoppe = await IntimateShoppe.new(1, 6000000, 600, aphrodite, token.address, '5e25', 0);
-       console.log("IntimateShoppe's address = " + shoppe.address);
+       log("IntimateShoppe's address = " + shoppe.address);
 
        await token.approve(shoppe.address, '5e25');
 
-       console.log("Aphrodite's token balance = " + await token.balanceOf(aphrodite));
-       console.log("allowance given to Shoppe contract = " + await token.allowance(aphrodite, shoppe.address));
+       log("Aphrodite's token balance = " + await token.balanceOf(aphrodite));
+       log("allowance given to Shoppe contract = " + await token.allowance(aphrodite, shoppe.address));
        assert.equal((await token.allowance(aphrodite, shoppe.address)).toNumber(), '5e25');
 
        const aphroditeBalance = (await web3.eth.getBalance(aphrodite)).toNumber();
-       console.log("wallet balance before = " + aphroditeBalance);
+       log("wallet balance before = " + aphroditeBalance);
 
        increaseTime(8000000);
        try {
@@ -157,7 +157,7 @@ contract('IntimateShoppe', accounts => {
        } catch (error) {
            assertRevert(error);
        }
-       console.log("Human's ether balance after purchase = " + web3.eth.getBalance(human).toNumber());
+       log("Human's ether balance after purchase = " + web3.eth.getBalance(human).toNumber());
 
 
     });
@@ -167,7 +167,7 @@ contract('IntimateShoppe', accounts => {
        const token = await Aphrodite.new();
 
        const shoppe = await IntimateShoppe.new(300000, 600000, 600, aphrodite, token.address, '5e25', 0);
-       console.log("IntimateShoppe's address = " + shoppe.address);
+       log("IntimateShoppe's address = " + shoppe.address);
 
 
        await shoppe.setMaxValue(web3.toWei(42, 'ether'));
@@ -180,7 +180,7 @@ contract('IntimateShoppe', accounts => {
        const token = await Aphrodite.new();
 
        const shoppe = await IntimateShoppe.new(1, 6000000, 600, aphrodite, token.address, '5e25', 0);
-       console.log("IntimateShoppe's address = " + shoppe.address);
+       log("IntimateShoppe's address = " + shoppe.address);
 
        increaseTime(300000);
 
@@ -199,7 +199,7 @@ contract('IntimateShoppe', accounts => {
        const token = await Aphrodite.new();
 
        const shoppe = await IntimateShoppe.new(300000, 600000, 600, aphrodite, token.address, '5e25', 0);
-       console.log("IntimateShoppe's address = " + shoppe.address);
+       log("IntimateShoppe's address = " + shoppe.address);
 
 
        await shoppe.setMinValue(web3.toWei(0.25, 'ether'));
@@ -212,7 +212,7 @@ contract('IntimateShoppe', accounts => {
        const token = await Aphrodite.new();
 
        const shoppe = await IntimateShoppe.new(1, 6000000, 600, aphrodite, token.address, '5e25', 0);
-       console.log("IntimateShoppe's address = " + shoppe.address);
+       log("IntimateShoppe's address = " + shoppe.address);
 
        increaseTime(300000);
 
@@ -231,7 +231,7 @@ contract('IntimateShoppe', accounts => {
        const token = await Aphrodite.new();
 
        const shoppe = await IntimateShoppe.new(300000, 600000, 600, aphrodite, token.address, '40000000000000000000000000', 0);
-       console.log("IntimateShoppe's address = " + shoppe.address);
+       log("IntimateShoppe's address = " + shoppe.address);
 
        await shoppe.setCap(web3.toWei(40000000, 'ether'));
        assert.equal((await shoppe.capTokens()).toNumber(), '40000000000000000000000000');
@@ -243,7 +243,7 @@ contract('IntimateShoppe', accounts => {
        const token = await Aphrodite.new();
 
        const shoppe = await IntimateShoppe.new(1, 6000000, 600, aphrodite, token.address, '40000000000000000000000000', 0);
-       console.log("IntimateShoppe's address = " + shoppe.address);
+       log("IntimateShoppe's address = " + shoppe.address);
 
        increaseTime(300000);
 
@@ -261,7 +261,7 @@ contract('IntimateShoppe', accounts => {
        const token = await Aphrodite.new();
 
        const shoppe = await IntimateShoppe.new(1, 6000000, 600, aphrodite, token.address, '5e25', 0);
-       console.log("IntimateShoppe's address = " + shoppe.address);
+       log("IntimateShoppe's address = " + shoppe.address);
 
        await shoppe.setHighWater(web3.toWei(12, 'ether'));
        assert.equal((await shoppe.getHighWater()).toNumber(), 12*1e18);
@@ -273,7 +273,7 @@ contract('IntimateShoppe', accounts => {
        const token = await Aphrodite.new();
 
        const shoppe = await IntimateShoppe.new(1, 6000000, 600, aphrodite, token.address, '40000000000000000000000000', 0);
-       console.log("IntimateShoppe's address = " + shoppe.address);
+       log("IntimateShoppe's address = " + shoppe.address);
 
        increaseTime(300000);
 
@@ -291,7 +291,7 @@ contract('IntimateShoppe', accounts => {
        const token = await Aphrodite.new();
 
        const shoppe = await IntimateShoppe.new(1, 6000000, 600, aphrodite, token.address, '5e25', 0);
-       console.log("IntimateShoppe's address = " + shoppe.address);
+       log("IntimateShoppe's address = " + shoppe.address);
 
        increaseTime(8000000);
 
