@@ -14,7 +14,8 @@ import "../auth/Authorized.sol";
 
 /**
  * @title Freezable
- * @dev Base contract which allows children to implement an emergency stop mechanism.
+ * @dev allows authorized accounts to add/remove other accounts to the list of fozen accounts.
+ * Accounts in the list cannot transfer and approve and their balances and allowances cannot be retrieved.
  */
 contract Freezable is AuthorizedList, Authorized {
 
