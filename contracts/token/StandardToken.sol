@@ -29,7 +29,7 @@ contract StandardToken is IERC20Basic, BasicToken, IERC20 {
     /// @param _from The source address  for tokens
     /// @param _to The destination address for tokens
     /// @param _value The number/amount to transfer
-    function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused returns (bool) {
+    function transferFrom(address _from, address _to, uint256 _value) public whenNotPaused notFrozen returns (bool) {
 
         // Don't send tokens to 0x0 address, use burn function that updates totalSupply
         // and don't waste gas sending tokens to yourself
