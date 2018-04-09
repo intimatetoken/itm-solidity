@@ -14,7 +14,7 @@
 const Aphrodite = artifacts.require('../contracts/Intimate.io/token/Aphrodite.sol');
 const IntimateShoppe = artifacts.require('../contracts/Intimate.io/sales/IntimateShoppe.sol');
 
-const { CUPID, increaseTime, assertRevert, log } = require('../globals');
+const { CUPID, increaseTime, assertRevert, log, latestTime } = require('../globals');
 
 contract('IntimateShoppe', accounts => {
 
@@ -53,7 +53,7 @@ contract('IntimateShoppe', accounts => {
        /// The address of the token this contract is selling
        /// Token cap is 50% of totalSupply
 
-       const shoppe = await IntimateShoppe.new(1, 6000000, 600, aphrodite, token.address, '5e25', 0);
+       const shoppe = await IntimateShoppe.new(latestTime(), 6000000, 600, aphrodite, token.address, '5e25', 0);
        log("IntimateShoppe's address = " + shoppe.address);
 
 
@@ -107,7 +107,7 @@ contract('IntimateShoppe', accounts => {
 
        const token = await Aphrodite.new();
 
-       const shoppe = await IntimateShoppe.new(3000000, 6000000, 600, aphrodite, token.address, '5e25', 0);
+       const shoppe = await IntimateShoppe.new(latestTime() + 3000000, 6000000, 600, aphrodite, token.address, '5e25', 0);
        log("IntimateShoppe's address = " + shoppe.address);
 
        await token.approve(shoppe.address, '5e25');
@@ -136,7 +136,7 @@ contract('IntimateShoppe', accounts => {
 
        const token = await Aphrodite.new();
 
-       const shoppe = await IntimateShoppe.new(1, 6000000, 600, aphrodite, token.address, '5e25', 0);
+       const shoppe = await IntimateShoppe.new(latestTime(), 6000000, 600, aphrodite, token.address, '5e25', 0);
        log("IntimateShoppe's address = " + shoppe.address);
 
        await token.approve(shoppe.address, '5e25');
@@ -161,12 +161,52 @@ contract('IntimateShoppe', accounts => {
 
 
     });
+
+    it ('cannot buy less than the minimum amount', async () => {
+       const token = await Aphrodite.new();
+       const shoppe = await IntimateShoppe.new(latestTime(), 6000000, 600, aphrodite, token.address, '5e25', 0);
+       await token.approve(shoppe.address, '5e25');
+       assert.equal((await token.allowance(aphrodite, shoppe.address)).toNumber(), '5e25');
+
+       const aphroditeBalance = (await web3.eth.getBalance(aphrodite)).toNumber();
+       log("wallet balance before = " + aphroditeBalance);
+
+       try {
+           const tx = await web3.eth.sendTransaction({gas: 500000, from: human, to: shoppe.address,
+                    value: web3.toWei(50, 'wei')});
+           assert.notEqual(tx, 0x0);
+           assert.fail();
+       } catch (error) {
+           assertRevert(error);
+       }
+       log("Human's ether balance after purchase = " + web3.eth.getBalance(human).toNumber());
+    });
+
+    it ('the minimum amount is adjusted for rate during initialization', async () => {
+       const token = await Aphrodite.new();
+       const shoppe = await IntimateShoppe.new(latestTime(), 6000000, 1500, aphrodite, token.address, '5e25', 0);
+       await token.approve(shoppe.address, '5e25');
+       assert.equal((await token.allowance(aphrodite, shoppe.address)).toNumber(), '5e25');
+
+       const aphroditeBalance = (await web3.eth.getBalance(aphrodite)).toNumber();
+       log("wallet balance before = " + aphroditeBalance);
+
+       try {
+           const tx = await web3.eth.sendTransaction({gas: 500000, from: human, to: shoppe.address,
+                    value: web3.toWei(800, 'wei')});
+           assert.notEqual(tx, 0x0);
+           assert.fail();
+       } catch (error) {
+           assertRevert(error);
+       }
+       log("Human's ether balance after purchase = " + web3.eth.getBalance(human).toNumber());
+    });
  
     it ('can set maximum value for purchase before sale starts', async () => {
 
        const token = await Aphrodite.new();
 
-       const shoppe = await IntimateShoppe.new(300000, 600000, 600, aphrodite, token.address, '5e25', 0);
+       const shoppe = await IntimateShoppe.new(latestTime() + 300000, 600000, 600, aphrodite, token.address, '5e25', 0);
        log("IntimateShoppe's address = " + shoppe.address);
 
 
@@ -176,10 +216,9 @@ contract('IntimateShoppe', accounts => {
     });
 
     it ('cannot change maximum value while the sale is ongong', async () => {
-
        const token = await Aphrodite.new();
 
-       const shoppe = await IntimateShoppe.new(1, 6000000, 600, aphrodite, token.address, '5e25', 0);
+       const shoppe = await IntimateShoppe.new(latestTime(), 6000000, 600, aphrodite, token.address, '5e25', 0);
        log("IntimateShoppe's address = " + shoppe.address);
 
        increaseTime(300000);
@@ -195,7 +234,6 @@ contract('IntimateShoppe', accounts => {
     });
 
     it ('can set minimum value for purchase before sale starts', async () => {
-
        const token = await Aphrodite.new();
 
        const shoppe = await IntimateShoppe.new(300000, 600000, 600, aphrodite, token.address, '5e25', 0);
@@ -208,10 +246,9 @@ contract('IntimateShoppe', accounts => {
     });
 
     it ('cannot change minimum value if the sale is ongong', async () => {
-
        const token = await Aphrodite.new();
 
-       const shoppe = await IntimateShoppe.new(1, 6000000, 600, aphrodite, token.address, '5e25', 0);
+       const shoppe = await IntimateShoppe.new(latestTime(), 6000000, 600, aphrodite, token.address, '5e25', 0);
        log("IntimateShoppe's address = " + shoppe.address);
 
        increaseTime(300000);
@@ -230,7 +267,7 @@ contract('IntimateShoppe', accounts => {
 
        const token = await Aphrodite.new();
 
-       const shoppe = await IntimateShoppe.new(300000, 600000, 600, aphrodite, token.address, '40000000000000000000000000', 0);
+       const shoppe = await IntimateShoppe.new(latestTime() + 300000, 600000, 600, aphrodite, token.address, '40000000000000000000000000', 0);
        log("IntimateShoppe's address = " + shoppe.address);
 
        await shoppe.setCap(web3.toWei(40000000, 'ether'));
@@ -242,7 +279,7 @@ contract('IntimateShoppe', accounts => {
 
        const token = await Aphrodite.new();
 
-       const shoppe = await IntimateShoppe.new(1, 6000000, 600, aphrodite, token.address, '40000000000000000000000000', 0);
+       const shoppe = await IntimateShoppe.new(latestTime(), 6000000, 600, aphrodite, token.address, '40000000000000000000000000', 0);
        log("IntimateShoppe's address = " + shoppe.address);
 
        increaseTime(300000);
@@ -260,7 +297,7 @@ contract('IntimateShoppe', accounts => {
 
        const token = await Aphrodite.new();
 
-       const shoppe = await IntimateShoppe.new(1, 6000000, 600, aphrodite, token.address, '5e25', 0);
+       const shoppe = await IntimateShoppe.new(latestTime(), 6000000, 600, aphrodite, token.address, '5e25', 0);
        log("IntimateShoppe's address = " + shoppe.address);
 
        await shoppe.setHighWater(web3.toWei(12, 'ether'));
@@ -272,7 +309,7 @@ contract('IntimateShoppe', accounts => {
 
        const token = await Aphrodite.new();
 
-       const shoppe = await IntimateShoppe.new(1, 6000000, 600, aphrodite, token.address, '40000000000000000000000000', 0);
+       const shoppe = await IntimateShoppe.new(latestTime(), 6000000, 600, aphrodite, token.address, '40000000000000000000000000', 0);
        log("IntimateShoppe's address = " + shoppe.address);
 
        increaseTime(300000);
@@ -290,7 +327,7 @@ contract('IntimateShoppe', accounts => {
 
        const token = await Aphrodite.new();
 
-       const shoppe = await IntimateShoppe.new(1, 6000000, 600, aphrodite, token.address, '5e25', 0);
+       const shoppe = await IntimateShoppe.new(latestTime(), 6000000, 600, aphrodite, token.address, '5e25', 0);
        log("IntimateShoppe's address = " + shoppe.address);
 
        increaseTime(8000000);

@@ -18,10 +18,14 @@ contract TokenLedger is AuthorizedList, Authorized {
     mapping(address => uint256) public balances;
     uint256 public totalsupply;
 
+    struct SeenAddressRecord {
+        bool seen;
+        uint256 accountArrayIndex;
+    }
+
     // Iterable accounts
     address[] internal accounts;
-    mapping(address => bool) internal seenBefore;
-
+    mapping(address => SeenAddressRecord) internal seenBefore;
 
     /// @dev Keeping track of addresses in an array is useful as mappings are not iterable
     /// @return Number of addresses holding this token

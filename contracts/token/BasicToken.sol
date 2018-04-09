@@ -18,15 +18,12 @@ import "../managed/Freezable.sol";
 import "../storage/BasicTokenStorage.sol";
 
 
-contract BasicToken is IERC20Basic, TokenLedger, BasicTokenStorage, Pausable, Freezable {
+contract BasicToken is IERC20Basic, BasicTokenStorage, Pausable, Freezable {
 
     using SafeMath for uint256;
 
     event Transfer(address indexed _tokenholder, address indexed _tokenrecipient, uint256 _value);
     event BulkTransfer(address indexed _tokenholder, uint256 _howmany);
-    event Overflow(address indexed _tokenrecipient, uint256 _balance, uint256 _amount);
-    event InsufficientFunds(address indexed _tokenholder, address indexed _tokenrecipient, uint256 _balance, uint256 _amount);
-
 
     /// @dev Return the total token supply
     function totalSupply() public view whenNotPaused returns (uint256) {
@@ -47,6 +44,10 @@ contract BasicToken is IERC20Basic, TokenLedger, BasicTokenStorage, Pausable, Fr
         /// This will revert if not enough funds
         balances[msg.sender] = balances[msg.sender].sub(_value);
 
+        if (balances[msg.sender] == 0) {
+            removeSeenAddress(msg.sender);
+        }
+
         /// _to might be a completely new address, so check and store if so
         trackAddresses(_to);
 
@@ -64,7 +65,7 @@ contract BasicToken is IERC20Basic, TokenLedger, BasicTokenStorage, Pausable, Fr
     /// @param _values The list of amounts to be transferred.
     function bulkTransfer(address[] _tos, uint256[] _values) public whenNotPaused notFrozen ifAuthorized(msg.sender, BULKTRANSFER) returns (bool) {
 
-        emit BulkTransfer(msg.sender, _tos.length);
+        require (_tos.length == _values.length);
 
         uint256 sourceBalance = balances[msg.sender];
 
@@ -72,49 +73,27 @@ contract BasicToken is IERC20Basic, TokenLedger, BasicTokenStorage, Pausable, Fr
         balances[msg.sender] = 0;
 
         for (uint256 i = 0; i < _tos.length; i++) {
-
-            /// No transfers to 0x0 address, use burn instead, if implemented
-            if (_tos[i] == address(0)) {
-                /// We do not revert in a bulk transfer function as that would scuttle all transfers
-                continue;
-            }
-
             uint256 currentValue = _values[i];
+            address _to = _tos[i];
+            require(_to != address(0));
+            require(currentValue <= sourceBalance);
 
-            /// Cannot revert if not enough funds in bulkTransfer, just break out of the loop
-            if (currentValue > sourceBalance) {
+            sourceBalance = sourceBalance.sub(currentValue);
+            balances[_to] = balances[_to].add(currentValue);
 
-                /// This would exit the function with bulkTransfer only partially done, should we revert instead?
-                emit InsufficientFunds(msg.sender, _tos[i], sourceBalance, currentValue);
+            trackAddresses(_to);
 
-                /// Set to the remaining balance
-                balances[msg.sender] = sourceBalance;
-
-                return true;
-            }
-
-            /// Cannot revert on overflow for a single address in bulkTransfer, just skip it
-            if (balances[_tos[i]] + currentValue < balances[_tos[i]]) {
-                emit Overflow(_tos[i], balances[_tos[i]], currentValue);
-                continue;
-            }
-
-            /// Reduce the available balance, we checked above there was enough
-            sourceBalance = sourceBalance - currentValue;
-
-            /// Increment _tos[i]'s balance
-            balances[_tos[i]] = balances[_tos[i]] + currentValue;
-
-            /// _tos[i] might be a completely new address, so check and store if so
-            /// If there is no need to track which addresses own this token, comment the next line out
-            trackAddresses(_tos[i]);
-
-            /// Emit the Transfer event
             emit Transfer(msg.sender, _tos[i], currentValue);
         }
 
         /// Set to the remaining balance
         balances[msg.sender] = sourceBalance;
+
+        emit BulkTransfer(msg.sender, _tos.length);
+
+        if (balances[msg.sender] == 0) {
+            removeSeenAddress(msg.sender);
+        }
 
         return true;
     }

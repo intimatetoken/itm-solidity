@@ -24,6 +24,9 @@ contract Freezable is AuthorizedList, Authorized {
     
     mapping (address => bool) public frozenAccounts;
 
+    /// Make sure access control is initialized
+    function Freezable() public AuthorizedList() Authorized() { }
+
     /**
     * @dev Throws if called by any account that's frozen.
     */

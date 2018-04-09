@@ -12,6 +12,12 @@
 
 const sha3 = require('solidity-sha3').default;
 
+const latestTime = () => {
+    return web3.eth.getBlock('latest').timestamp;
+};
+
+const increaseTime = addSeconds => web3.currentProvider.send({ jsonrpc: "2.0", method: "evm_increaseTime", params: [addSeconds], id: 0 });
+
 module.exports = {
     APHRODITE: sha3('Goddess of Love!'),
     CUPID: sha3('Aphrodite\'s Little Helper.'),
@@ -24,8 +30,6 @@ module.exports = {
             assert.fail('Call expected to revert; error was ' + error);
         }
     },
-
-    increaseTime: addSeconds => web3.currentProvider.send({ jsonrpc: "2.0", method: "evm_increaseTime", params: [addSeconds], id: 0 }),
 
     vestingFunds: '0xDeededBabeCafe',
 
@@ -51,5 +55,25 @@ module.exports = {
 
     sleep: (ms) => {
         return new Promise(resolve => setTimeout(resolve, ms));
+    },
+
+    latestTime,
+
+    increaseTime,
+
+    increaseTimeTo: (target) => {
+        let now = latestTime();
+        if (target < now) throw Error(`Cannot increase current time(${now}) to a moment in the past(${target})`);
+        let diff = target - now;
+        return increaseTime(diff);
+    },
+
+    duration: {
+        seconds: function (val) { return val; },
+        minutes: function (val) { return val * this.seconds(60); },
+        hours: function (val) { return val * this.minutes(60); },
+        days: function (val) { return val * this.hours(24); },
+        weeks: function (val) { return val * this.days(7); },
+        years: function (val) { return val * this.days(365); },
     }
 };

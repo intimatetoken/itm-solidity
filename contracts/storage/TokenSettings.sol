@@ -23,7 +23,7 @@ contract TokenSettings is AuthorizedList, Authorized {
     string public symbol = "ITM";
 
     uint256 public INITIAL_SUPPLY = 100000000 * 10**18;  // 100 million of subdivisible tokens
-    uint8 public decimals = 18;
+    uint8 public constant decimals = 18;
 
 
     /// @dev Change token name
@@ -36,12 +36,5 @@ contract TokenSettings is AuthorizedList, Authorized {
     /// @param _symbol string
     function setSymbol(string _symbol) public ifAuthorized(msg.sender, APHRODITE) {
         symbol = _symbol;
-    }
-
-    /// Not clear if we really need this, maybe should make decimals a constant
-    /// @dev Change token decimal digits
-    /// @param _decimals uint8
-    function setDecimals(uint8 _decimals) public ifAuthorized(msg.sender, APHRODITE) {
-        decimals = _decimals;
     }
 }

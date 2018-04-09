@@ -54,7 +54,6 @@ contract('Aphrodite', accounts => {
 
         it('can approve && transferFrom whenNotPaused', async () => {
             const token = await Aphrodite.new();
-            const vest = (await token.totalVestingSupply()).toNumber();
 
             log("token address = " + token.address);
 
@@ -71,7 +70,7 @@ contract('Aphrodite', accounts => {
 
             assert.notEqual(tx1, 0x0);
             assert.equal(await token.balanceOf(human), 1000);
-            assert.equal((await token.balanceOf(aphrodite)).toNumber() + vest, 1e26 - 1000);
+            assert.equal((await token.balanceOf(aphrodite)).toNumber(), 1e26 - 1000);
 
         });
 
