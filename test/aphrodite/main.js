@@ -30,6 +30,33 @@ contract('Aphrodite', accounts => {
             log(web3.eth.getBalance(cupid).toNumber());
         });
 
+        it('owner is listed in seen accounts', async () => {
+            const token = await Aphrodite.new();
+            const accounts = await token.returnAccounts();
+            assert.equal(accounts.length, 1);
+            assert.equal(accounts[0], aphrodite);
+        });
+
+        it('seen accounts are cleaned', async () => {
+            const token = await Aphrodite.new();
+            await token.transfer(human, 1000, { from: aphrodite });
+            await token.transfer(centaur, 1000, { from: aphrodite });
+            await token.transfer(cupid, 1000, { from: aphrodite });
+            const accounts = await token.returnAccounts();
+            assert.equal(accounts.length, 4);
+            assert.equal(accounts[0], aphrodite);
+            assert.equal(accounts[1], human);
+            assert.equal(accounts[2], centaur);
+            assert.equal(accounts[3], cupid);
+
+            await token.transfer(human, 1000, { from: cupid });
+            await token.transfer(human, 1000, { from: centaur });
+            const accounts2 = await token.returnAccounts();
+            assert.equal(accounts2.length, 2);
+            assert.equal(accounts2[0], aphrodite);
+            assert.equal(accounts2[1], human);
+        });
+
         it('cannot transfer more tokens than balance', async () => {
             const token = await Aphrodite.new();
 
@@ -47,23 +74,14 @@ contract('Aphrodite', accounts => {
         });
 
         it('can bulk transfer', async () => {
-
             const token = await Aphrodite.new();
 
             let bal = (await token.balanceOf(aphrodite)).toNumber();
-            const vest = (await token.totalVestingSupply()).toNumber();
 
-            assert.equal(bal + vest, '1e26');
+            assert.equal(bal, '1e26');
 
-            const addresses = [];
-            const amounts = [];
-
-            addresses.push(cupid);
-            amounts.push(1000);
-            addresses.push(human);
-            amounts.push(1000000);
-            addresses.push(centaur);
-            amounts.push(1000000000);
+            const addresses = [cupid, human, centaur];
+            const amounts = [1000, 1000000, 1000000000];
 
             bal = bal - 1000000000 - 1000000 - 1000;
 
@@ -78,14 +96,55 @@ contract('Aphrodite', accounts => {
 
         });
 
-        it('With permission a regular user can bulk transfer', async () => {
+        it('cannot bulk transfer with mismatched arrays', async () => {
+            const token = await Aphrodite.new();
 
+            const addresses = [cupid, human, centaur];
+            const amounts = [1000, 1000000];
+
+            try {
+                await token.bulkTransfer(addresses, amounts);
+                assert.fail();
+            } catch (error) {
+                assertRevert(error);
+            }
+        });
+
+        it('bulk transfer reverts on 0x0', async () => {
+            const token = await Aphrodite.new();
+
+            const addresses = [cupid, 0x0, centaur];
+            const amounts = [1000, 1000000, 1000000000];
+
+            try {
+                await token.bulkTransfer(addresses, amounts);
+                assert.fail();
+            } catch (error) {
+                assertRevert(error);
+            }
+        });
+
+        it('bulk transfer reverts on insufficient funds', async () => {
+            const token = await Aphrodite.new();
+            const aphroditeBalance = (await token.balanceOf(aphrodite)).toNumber();
+
+            const addresses = [cupid, human, centaur];
+            const amounts = [aphroditeBalance / 2, aphroditeBalance / 2, aphroditeBalance / 2];
+
+            try {
+                await token.bulkTransfer(addresses, amounts);
+                assert.fail();
+            } catch (error) {
+                assertRevert(error);
+            }
+        });
+
+        it('With permission a regular user can bulk transfer', async () => {
             const token = await Aphrodite.new();
 
             let bal = (await token.balanceOf(aphrodite)).toNumber();
-            const vest = (await token.totalVestingSupply()).toNumber();
 
-            assert.equal(bal + vest, '1e26');
+            assert.equal(bal, '1e26');
 
             const addresses = [];
             const amounts = [];
@@ -108,6 +167,7 @@ contract('Aphrodite', accounts => {
             await token.bulkTransfer(addresses, amounts, { from: human2 });
 
             log("Account list = " + await token.returnAccounts());
+            assert.equal((await token.returnAccounts()).length, 4);
 
             assert.equal(await token.balanceOf(aphrodite), 0);
             assert.equal(await token.balanceOf(cupid), 1000);
@@ -116,9 +176,7 @@ contract('Aphrodite', accounts => {
 
         });
 
-
         it('can replace name/symbol && retrieve their values', async () => {
-
             const token = await Aphrodite.new();
 
             const name = await token.setName('Venus');
@@ -130,22 +188,18 @@ contract('Aphrodite', accounts => {
         });
 
         it('can retrieve totalSupply and balanceOf', async () => {
-
             const token = await Aphrodite.new();
 
             const total = (await token.totalSupply()).toNumber();
             const bal = (await token.balanceOf(aphrodite)).toNumber();
-            log("Vesting supply = " + (await token.totalVestingSupply()).toNumber());
-            const vest = (await token.totalVestingSupply()).toNumber();
 
             assert.equal(0, 0);
             assert.equal(total, '1e26');
-            assert.equal(bal + vest, '1e26');
+            assert.equal(bal, '1e26');
 
         });
 
         it('can recover lost Ether', async () => {
-
             const token = await Aphrodite.new();
             const tx = await web3.eth.sendTransaction({ from: aphrodite, to: token.address, value: web3.toWei(1, 'ether') });
             assert.notEqual(tx, 0x0);
@@ -153,7 +207,9 @@ contract('Aphrodite', accounts => {
             log(web3.eth.getBalance(token.address).toNumber());
             assert.equal(web3.eth.getBalance(token.address), web3.toWei(1, 'ether'));
 
-            await token.recoverEther();
+            const result = await token.recoverEther();
+            assert.equal(result.logs.length, 1);
+            assert.equal(result.logs[0].event, 'EtherRecovered');
 
             log(web3.eth.getBalance(token.address).toNumber());
             assert.equal(web3.eth.getBalance(token.address), web3.toWei(0, 'ether'));
@@ -161,10 +217,8 @@ contract('Aphrodite', accounts => {
         });
 
         it('can recover lost Tokens', async () => {
-
             const token = await Aphrodite.new();
             const lostToken = await Aphrodite.new();
-            const vest = (await token.totalVestingSupply()).toNumber();
 
             await lostToken.transfer(token.address, '42000000000');
 
@@ -176,82 +230,8 @@ contract('Aphrodite', accounts => {
             await token.recoverToken(lostToken.address, { from: aphrodite });
 
             log((await lostToken.balanceOf(aphrodite)).toNumber());
-            assert.equal((await lostToken.balanceOf(aphrodite)).toNumber() + vest, '1e26');
+            assert.equal((await lostToken.balanceOf(aphrodite)).toNumber(), '1e26');
             assert.equal((await lostToken.balanceOf(token.address)).toNumber(), '0');
-
-        });
-
-        it('can vest over time && spend vested tokens', async () => {
-
-            const token = await Aphrodite.new();
-            log(await token.returnVestingAddresses());
-            const beneficiaries = await token.returnVestingAddresses();
-
-            const addr = await token.vestingFundsAddress();
-            log("Vesting Funds address = " + addr);
-
-            for (let i = 0; i < beneficiaries.length; i++) {
-                //log("Loop = " + beneficiaries[i]);
-                log("Loop = " + await token.returnVestingRecord(beneficiaries[i]));
-            }
-            await token.vest();
-            for (let i = 0; i < beneficiaries.length; i++) {
-                log("Loop = " + await token.allowance(addr, beneficiaries[i]));
-            }
-            // About 1.5 years
-            increaseTime(47304000 - 48 * 3600);
-            await token.vest();
-
-            for (let i = 0; i < beneficiaries.length; i++) {
-                log("Loop = " + await token.allowance(addr, beneficiaries[i]));
-            }
-            for (let j = 0; j < 24; j++) {
-                // One(1) month
-                increaseTime(5270400 / 2);
-                await token.vest();
-                for (let i = 0; i < beneficiaries.length; i++) {
-                    log("Current allowance = " + await token.allowance(addr, beneficiaries[i]));
-                }
-            }
-            log("Total funds for vesting = " + await token.balanceOf(addr));
-            for (let i = 0; i < beneficiaries.length; i++) {
-                const allowed = await token.allowance(addr, beneficiaries[i]);
-                await token.transferFrom(addr, beneficiaries[i], allowed.toNumber(), { from: beneficiaries[i] });
-            }
-            for (let i = 0; i < beneficiaries.length; i++) {
-                log(beneficiaries[i] + "'s balance = " + await token.balanceOf(beneficiaries[i]));
-            }
-            log("Total funds for vesting post distribution = " + await token.balanceOf(addr));
-            assert.equal(await token.balanceOf(addr), 0);
-
-        });
-
-        it('can revoke yet unvested tokens', async () => {
-
-            const token = await Aphrodite.new();
-            log("Before revocation = " + await token.returnVestingAddresses());
-            const beneficiaries = await token.returnVestingAddresses();
-
-            const addr = await token.vestingFundsAddress();
-            await token.revoke(human);
-            log("After revocation = " + await token.returnVestingAddresses());
-            log("Total funds for vesting after revocation = " + await token.balanceOf(addr));
-            assert.equal(beneficiaries.length - 1, (await token.numberVestingRecords()));
-
-        });
-
-        it('can create a new vesting record', async () => {
-
-            const token = await Aphrodite.new();
-            log("Before vesting record addition = " + await token.returnVestingAddresses());
-            const beneficiaries = await token.returnVestingAddresses();
-
-            const addr = await token.vestingFundsAddress();
-            await token.addVestingRecord(centaur, 1.2e22, 0, 365 * 24 * 3600, 2 * 365 * 24 * 3600, 365 * 2 * 3600);
-            log("After addition = " + await token.returnVestingAddresses());
-            log("Total funds for vesting after addition = " + await token.balanceOf(addr));
-            assert.equal(beneficiaries.length + 1, (await token.numberVestingRecords()));
-            assert.equal(await token.balanceOf(addr), 7.2e22);
 
         });
     });

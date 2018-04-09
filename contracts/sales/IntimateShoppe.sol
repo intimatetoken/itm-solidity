@@ -82,11 +82,11 @@ contract IntimateShoppe is Pausable, RecoverCurrency {
     /// What round it is
     uint8 public round = 0;
 
-    /// @param _timeFromNow is the amount of time in seconds to wait from deployment to start accepting Ether
+    /// @param _startTime is the absolute time from which to start accepting Ether
     /// @param _duration is the period of time in seconds how long the sale would last, so if a sale lasts 1 month
     /// then the _duration = 30(31)*24*60*60 seconds
     function IntimateShoppe(
-        uint256 _timeFromNow, 
+        uint256 _startTime, 
         uint256 _duration, 
         uint256 _rate, 
         address _wallet_address, 
@@ -94,7 +94,7 @@ contract IntimateShoppe is Pausable, RecoverCurrency {
         uint256 _cap,
         uint8 _round) public Authorized() {
 
-        require(_timeFromNow >= 0 && _duration > 0);
+        require(_startTime >= 0 && _duration > 0);
         require(_rate > 0);
         require(_wallet_address != address(0x0));
         require(_token_address != address(0x0));
@@ -102,10 +102,11 @@ contract IntimateShoppe is Pausable, RecoverCurrency {
 
         round = _round;
 
-        startTime = now + _timeFromNow;
-        endTime = now + _timeFromNow + _duration;
+        startTime = _startTime;
+        endTime = startTime + _duration;
 
         rate = _rate;
+        minValue = uint256(1 ether)/_rate;
         capTokens = _cap;
         wallet_address = _wallet_address;
         token_address = _token_address;
@@ -162,14 +163,14 @@ contract IntimateShoppe is Pausable, RecoverCurrency {
 
 
     /// @dev Reset the starting and ending times for the next round
-    /// @param _timeFromNow Start of the sale round
+    /// @param _startTime Start of the sale round
     /// @param _duration End of the sale round
-    function setTimes(uint256 _timeFromNow, uint256 _duration) public ifAuthorized(msg.sender, APHRODITE) {
+    function setTimes(uint256 _startTime, uint256 _duration) public ifAuthorized(msg.sender, APHRODITE) {
         /// Can't reset times if sale ongoing already, make sure everything else is set before
         require(now < startTime || now > endTime);
 
-        require(_timeFromNow >= 0 && _duration > 0);
-        startTime = now + _timeFromNow;
+        require(_startTime >= 0 && _duration > 0);
+        startTime = _startTime;
         endTime = startTime + _duration;
         emit SetPeriod(startTime, endTime);
     }

@@ -17,11 +17,11 @@ import "../auth/Authorized.sol";
 /// @title Authorized account can reclaim ERC20Basic tokens.
 contract RecoverCurrency is AuthorizedList, Authorized {
 
-    event Transfer(address indexed _from, address indexed _to, uint256 _value);
+    event EtherRecovered(address indexed _to, uint256 _value);
 
     function recoverEther() external ifAuthorized(msg.sender, APHRODITE) {
         msg.sender.transfer(address(this).balance);
-        emit Transfer(this, msg.sender, address(this).balance);
+        emit EtherRecovered(msg.sender, address(this).balance);
     }
 
     /// @dev Reclaim all ERC20Basic compatible tokens

@@ -14,22 +14,21 @@ pragma solidity ^0.4.21;
 import "../math/SafeMath.sol";
 import "../auth/Authorized.sol";
 import "./RecoverCurrency.sol";
-import "./VestingToken.sol";
+import "./StandardToken.sol";
 
-contract Aphrodite is AuthorizedList, Authorized, Pausable, RecoverCurrency, VestingToken {
+contract Aphrodite is AuthorizedList, Authorized, RecoverCurrency, StandardToken {
 
     event DonationAccepted(address indexed _from, uint256 _value);
 
     /// @dev Constructor that gives msg.sender/creator all of existing tokens.
-    function Aphrodite() Authorized() VestingToken() public {
+    function Aphrodite() Authorized()  public {
     
         /// We need to initialize totalsupply and creator's balance
         totalsupply = INITIAL_SUPPLY;
         balances[msg.sender] = INITIAL_SUPPLY;
 
-        /// Reduce token's creator balance by the amount of vesting funds
-        balances[msg.sender] = balances[msg.sender].sub(balances[vestingFunds]);
-
+        /// Record that the creator is a holder of this token
+        trackAddresses(msg.sender);
     }
 
     /// @dev If one prefers to not accept Ether, comment out the next iine out or put revert(); inside
