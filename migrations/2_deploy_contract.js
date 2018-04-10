@@ -1,4 +1,4 @@
-var Token = artifacts.require("./StandardToken.sol")
+var Token = artifacts.require("./Aphrodite.sol")
 var Sale = artifacts.require("./IntimateShoppe.sol")
 let networks = require('../truffle').networks
 
@@ -15,4 +15,7 @@ module.exports = async function(deployer, network, accounts) {
     '5e25', // uint256 _cap,
     0, // uint8 _round
   )
+
+  let token = await Token.deployed()
+  await token.approve(Sale.address, '5e25');
 };
