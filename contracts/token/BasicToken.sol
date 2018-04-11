@@ -77,6 +77,7 @@ contract BasicToken is IERC20Basic, BasicTokenStorage, Pausable, Freezable {
             address _to = _tos[i];
             require(_to != address(0));
             require(currentValue <= sourceBalance);
+            require(msg.sender != _to);
 
             sourceBalance = sourceBalance.sub(currentValue);
             balances[_to] = balances[_to].add(currentValue);

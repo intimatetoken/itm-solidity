@@ -110,6 +110,20 @@ contract('Aphrodite', accounts => {
             }
         });
 
+        it('cannot bulk transfer to self', async () => {
+            const token = await Aphrodite.new();
+
+            const addresses = [cupid, aphrodite, centaur];
+            const amounts = [1000, 1000, 1000];
+
+            try {
+                await token.bulkTransfer(addresses, amounts);
+                assert.fail();
+            } catch (error) {
+                assertRevert(error);
+            }
+        });
+
         it('bulk transfer reverts on 0x0', async () => {
             const token = await Aphrodite.new();
 
