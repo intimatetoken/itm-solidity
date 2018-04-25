@@ -10,12 +10,12 @@ let mnemonic = process.env.MNEMONIC
 let infuraAccessToken = process.env.INFURA_ACCESS_TOKEN
 
 module.exports = {
-  solc: {
-    optimizer: {
-      enabled: true,
-      runs: 200
-    }
-  },
+  // solc: {
+  //   optimizer: {
+  //     enabled: true,
+  //     runs: 200
+  //   }
+  // },
   networks: {
     development: {
       host: "localhost",
@@ -58,7 +58,7 @@ module.exports = {
     },
     mainnet: {
       network_id: "1",
-      gas: 16000000,
+      gas: 7990000,
       gasPrice: 100000000000, // 100 gwei
       provider() {
         var ledgerOptions = {
@@ -67,6 +67,7 @@ module.exports = {
         }
 
         return new LedgerWalletProvider(ledgerOptions, `https://mainnet.infura.io/${infuraAccessToken}`)
+        // return new HDWalletProvider(mnemonic, `https://mainnet.infura.io/${infuraAccessToken}`)
       }
     }
   },
