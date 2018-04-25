@@ -26,6 +26,7 @@ module.exports = {
     ropsten:  {
       network_id: 3,
       gas: 4600000,
+      gasPrice: 100000000000, // 100 gwei
       provider() {
         var ledgerOptions = {
           networkId: 3,
@@ -38,7 +39,7 @@ module.exports = {
     kovan: {
       network_id: 42,
       gas: 4712388,
-      gasPrice: 25000000000,
+      gasPrice: 100000000000, // 100 gwei
       provider() {
         return new HDWalletProvider(mnemonic, `https://kovan.infura.io/${infuraAccessToken}`)
       },
@@ -58,7 +59,7 @@ module.exports = {
     mainnet: {
       network_id: "1",
       gas: 7000000,
-      gasPrice: 1e9,
+      gasPrice: 100000000000, // 100 gwei
       provider() {
         var ledgerOptions = {
           networkId: 1,
