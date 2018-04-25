@@ -11,10 +11,10 @@
 
 'use strict';
 
-const Aphrodite = artifacts.require('../contracts/Intimate.io/token/Aphrodite.sol');
-const IntimateShoppe = artifacts.require('../contracts/Intimate.io/sales/IntimateShoppe.sol');
+const Aphrodite = artifacts.require('./token/Aphrodite.sol');
+const IntimateShoppe = artifacts.require('./sales/IntimateShoppe.sol');
 
-const { CUPID, increaseTime, assertRevert, log, latestTime } = require('../globals');
+const { APHRODITE, CUPID, increaseTime, assertRevert, getBalance, log, latestTime, sendTransaction } = require('../globals');
 
 contract('IntimateShoppe', accounts => {
 
@@ -24,11 +24,9 @@ contract('IntimateShoppe', accounts => {
     const centaur = accounts[3];
 
 
-    it ('can get Ether balance for accounts', async () => {
-
-       log(web3.eth.getBalance(aphrodite).toNumber());
-       log(web3.eth.getBalance(cupid).toNumber());
-
+    it('can get Ether balance for accounts', async () => {
+       log((await getBalance(aphrodite)).toNumber());
+       log((await getBalance(cupid)).toNumber());
     });
 
     it ('can set permissions', async () => {
@@ -42,9 +40,10 @@ contract('IntimateShoppe', accounts => {
     });
 
 
-    it ('can buy tokens from the shoppe', async () => {
+    it.only ('can buy tokens from the shoppe', async () => {
 
        const token = await Aphrodite.new();
+       log("Token's address = " + token.address);
 
        /// Start sale immediately
        /// Sale lasts 6000000 seconds
@@ -52,55 +51,118 @@ contract('IntimateShoppe', accounts => {
        /// Use Aphrodite's address as the beneficiary wallet
        /// The address of the token this contract is selling
        /// Token cap is 50% of totalSupply
-
-       const shoppe = await IntimateShoppe.new(latestTime(), 6000000, 600, aphrodite, token.address, '5e25', 0);
+       console.log(await latestTime(), 6000000, 600, aphrodite, token.address, '5e25', 0)
+       const shoppe = await IntimateShoppe.new(await latestTime(), 6000000, 600, aphrodite, token.address, '5e25', 0);
        log("IntimateShoppe's address = " + shoppe.address);
-
 
        /// We are approving the token shoppe to spend some tokens in the wallet
        /// which happens to be aphrodite at the moment
        await token.approve(shoppe.address, '5e25');
 
+       // Approve the token shoppe so it can freeze accounts.
+       await token.toggleAuthorization(shoppe.address, APHRODITE)
+
        log("Aphrodite's token balance = " + await token.balanceOf(aphrodite));
        log("allowance given to Shoppe contract = " + await token.allowance(aphrodite, shoppe.address));
        assert.equal((await token.allowance(aphrodite, shoppe.address)).toNumber(), '5e25');
 
-       const aphroditeBalance = (await web3.eth.getBalance(aphrodite)).toNumber();
+       const aphroditeBalance = (await getBalance(aphrodite)).toNumber();
        log("wallet balance before = " + aphroditeBalance);
 
-       const tx = await web3.eth.sendTransaction({gas: 500000, from: human, to: shoppe.address, 
-                    value: web3.toWei(3, 'ether')});
+        /**
+         * HUMAN PURCHASE
+         */
+       const tx = await sendTransaction({
+           gas: 500000, 
+           from: human, 
+           to: shoppe.address, 
+           value: web3.toWei(3, 'ether')
+       });
        assert.notEqual(tx, 0x0);
-       log("Human's ether balance after purchase = " + web3.eth.getBalance(human).toNumber());
+       log("Human's ether balance after purchase = " + (await getBalance(human)).toNumber());
 
+       // Assert the tokens are frozen
+       try {
+         let tokensBought = await token.balanceOf(human);
+         assert.fail()
+       }
+       catch (err) {
+        assertRevert(err)
+        log('Human ITM tokens are frozen')
+       }
+
+       // Unfreeze the tokens
+       await token.unfreezeAccount(human)
+       
+       // Continue the checking
        let tokensBought = await token.balanceOf(human);
        log("Human bought ITM tokens = " + tokensBought);
        assert.equal(tokensBought.toNumber(), 600*(web3.toWei(3, 'ether')));
 
-       const tx1 = await web3.eth.sendTransaction({gas: 500000, from: centaur, to: shoppe.address, 
-                    value: web3.toWei(0.25, 'ether')});
-       const tx2 = await web3.eth.sendTransaction({gas: 500000, from: centaur, to: shoppe.address, 
-                    value: web3.toWei(0.5, 'ether')});
+       /**
+        * CENTAUR PURCHASE
+        */
+       log("Centaur's ether balance before purchase = " + (await getBalance(centaur)).toNumber());
+
+       const tx1 = await sendTransaction({
+           gas: 500000, 
+           from: centaur, 
+           to: shoppe.address, 
+           value: web3.toWei(0.25, 'ether')
+       });
+
+       log("Centaur's ether balance after 1st purchase = " + (await getBalance(centaur)).toNumber());
        assert.notEqual(tx1, 0x0);
-       assert.notEqual(tx2, 0x0);
+       
+       try {
+            const tx2 = await sendTransaction({
+                gas: 500000, 
+                from: centaur, 
+                to: shoppe.address, 
+                value: web3.toWei(0.5, 'ether')
+            }); 
 
-       log("Centaur's ether balance after purchase = " + web3.eth.getBalance(centaur).toNumber());
+            assert.fail()
+       }
+       catch (err) {
+           assertRevert(err)
+           log('Centaur cannot purchase again because ITM tokens are frozen')
+       }
+       
+       log("Centaur's ether balance after 2nd purchase = " + (await getBalance(centaur)).toNumber());
 
-       tokensBought = await token.balanceOf(centaur);
-       log("Centaur bought ITM tokens = " + tokensBought);
-       assert.equal(tokensBought.toNumber(), 600*(web3.toWei(0.75, 'ether')));
+      // Unfreeze the tokens
+      await token.unfreezeAccount(centaur)
+
+      log("Centaur's unfrozen");
+
+      // Now purchase...
+      const tx3 = await sendTransaction({
+            gas: 500000, 
+            from: centaur, 
+            to: shoppe.address, 
+            value: web3.toWei(0.5, 'ether')
+        })
+
+      await token.unfreezeAccount(centaur)
+
+      // Continue the checking
+       let centaurTokensBought = await token.balanceOf(centaur);
+       log("Centaur bought ITM tokens = " + centaurTokensBought);
+       assert.equal(centaurTokensBought.toNumber(), 600*(web3.toWei(0.75, 'ether')));
 
        log("Accounts list = " + await token.returnAccounts());
 
-       log("Contract's ether balance after purchase = " + web3.eth.getBalance(shoppe.address).toNumber());
-       assert.equal(web3.eth.getBalance(shoppe.address).toNumber(), web3.toWei(0.75, 'ether'));
+       log("Contract's ether balance after purchase = " + (await getBalance(shoppe.address)).toNumber());
+       assert.equal((await getBalance(shoppe.address)).toNumber(), web3.toWei(0.75, 'ether'));
 
        log(await shoppe.getContributionsForAddress(centaur));
 
-       /// Make sure that totals for Ether received and tokens sold are correct
+       /**
+        * Make sure that totals for Ether received and tokens sold are correct
+        */
        assert.equal((await shoppe.weiRaised()).toNumber(), web3.toWei(3.75, 'ether'));
        assert.equal((await shoppe.tokensSold()).toNumber(), 600*web3.toWei(3.75, 'ether'));
-
     });
 
     it ('cannot buy tokens from the shoppe before the sale started', async () => {
@@ -116,18 +178,18 @@ contract('IntimateShoppe', accounts => {
        log("allowance given to Shoppe contract = " + await token.allowance(aphrodite, shoppe.address));
        assert.equal((await token.allowance(aphrodite, shoppe.address)).toNumber(), '5e25');
 
-       const aphroditeBalance = (await web3.eth.getBalance(aphrodite)).toNumber();
+       const aphroditeBalance = (await getBalance(aphrodite)).toNumber();
        log("wallet balance before = " + aphroditeBalance);
 
        try {
-           const tx = await web3.eth.sendTransaction({gas: 500000, from: human, to: shoppe.address,
+           const tx = await sendTransaction({gas: 500000, from: human, to: shoppe.address,
                     value: web3.toWei(3, 'ether')});
            assert.notEqual(tx, 0x0);
            assert.fail();
        } catch (error) {
            assertRevert(error);
        }
-       log("Human's ether balance after purchase = " + web3.eth.getBalance(human).toNumber());
+       log("Human's ether balance after purchase = " + (await getBalance(human)).toNumber());
 
 
     });
@@ -145,19 +207,19 @@ contract('IntimateShoppe', accounts => {
        log("allowance given to Shoppe contract = " + await token.allowance(aphrodite, shoppe.address));
        assert.equal((await token.allowance(aphrodite, shoppe.address)).toNumber(), '5e25');
 
-       const aphroditeBalance = (await web3.eth.getBalance(aphrodite)).toNumber();
+       const aphroditeBalance = (await getBalance(aphrodite)).toNumber();
        log("wallet balance before = " + aphroditeBalance);
 
        increaseTime(8000000);
        try {
-           const tx = await web3.eth.sendTransaction({gas: 500000, from: human, to: shoppe.address,
+           const tx = await sendTransaction({gas: 500000, from: human, to: shoppe.address,
                     value: web3.toWei(3, 'ether')});
            assert.notEqual(tx, 0x0);
            assert.fail();
        } catch (error) {
            assertRevert(error);
        }
-       log("Human's ether balance after purchase = " + web3.eth.getBalance(human).toNumber());
+       log("Human's ether balance after purchase = " + (await getBalance(human)).toNumber());
 
 
     });
@@ -168,18 +230,18 @@ contract('IntimateShoppe', accounts => {
        await token.approve(shoppe.address, '5e25');
        assert.equal((await token.allowance(aphrodite, shoppe.address)).toNumber(), '5e25');
 
-       const aphroditeBalance = (await web3.eth.getBalance(aphrodite)).toNumber();
+       const aphroditeBalance = (await getBalance(aphrodite)).toNumber();
        log("wallet balance before = " + aphroditeBalance);
 
        try {
-           const tx = await web3.eth.sendTransaction({gas: 500000, from: human, to: shoppe.address,
+           const tx = await sendTransaction({gas: 500000, from: human, to: shoppe.address,
                     value: web3.toWei(50, 'wei')});
            assert.notEqual(tx, 0x0);
            assert.fail();
        } catch (error) {
            assertRevert(error);
        }
-       log("Human's ether balance after purchase = " + web3.eth.getBalance(human).toNumber());
+       log("Human's ether balance after purchase = " + (await getBalance(human)).toNumber());
     });
 
     it ('the minimum amount is adjusted for rate during initialization', async () => {
@@ -188,7 +250,7 @@ contract('IntimateShoppe', accounts => {
        await token.approve(shoppe.address, '5e25');
        assert.equal((await token.allowance(aphrodite, shoppe.address)).toNumber(), '5e25');
 
-       const aphroditeBalance = (await web3.eth.getBalance(aphrodite)).toNumber();
+       const aphroditeBalance = (await getBalance(aphrodite)).toNumber();
        log("wallet balance before = " + aphroditeBalance);
 
        try {
@@ -199,7 +261,7 @@ contract('IntimateShoppe', accounts => {
        } catch (error) {
            assertRevert(error);
        }
-       log("Human's ether balance after purchase = " + web3.eth.getBalance(human).toNumber());
+       log("Human's ether balance after purchase = " + (await getBalance(human)).toNumber());
     });
  
     it ('can set maximum value for purchase before sale starts', async () => {

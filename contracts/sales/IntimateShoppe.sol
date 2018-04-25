@@ -20,6 +20,7 @@ import "../managed/Pausable.sol";
 import "../token/RecoverCurrency.sol";
 import "../token/IERC20Basic.sol";
 import "../token/IERC20.sol";
+import "../token/StandardToken.sol";
 
 
 contract IntimateShoppe is Pausable, RecoverCurrency {
@@ -46,7 +47,7 @@ contract IntimateShoppe is Pausable, RecoverCurrency {
 
 
     /// The ITM token object
-    IERC20 public token;
+    StandardToken public token;
 
     /// address of the ITM token
     address public token_address;
@@ -110,7 +111,7 @@ contract IntimateShoppe is Pausable, RecoverCurrency {
         capTokens = _cap;
         wallet_address = _wallet_address;
         token_address = _token_address;
-        token = IERC20(token_address);
+        token = StandardToken(token_address);
     }
 
     /// @dev Log contributors and their contributions
@@ -244,6 +245,8 @@ contract IntimateShoppe is Pausable, RecoverCurrency {
         /// using ERC20 approve function before this contract can transfer tokens.
    
         if (token.transferFrom(wallet_address, msg.sender, tokens)) {
+
+            token.freezeAccount(msg.sender);
 
             weiRaised = weiRaised.add(msg.value);
             tokensSold = tokensSold.add(tokens);

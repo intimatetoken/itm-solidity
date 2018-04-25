@@ -26,7 +26,7 @@ contract('Aphrodite', accounts => {
     const human3 = accounts[5];
     const human4 = accounts[6];
 
-    describe('vestable', () => {
+    describe.skip('vestable', () => {
 
         it('should linearly release tokens during vesting period', async function () {
             const start = latestTime() + duration.minutes(1);
