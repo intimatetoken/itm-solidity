@@ -24,7 +24,7 @@ contract('Aphrodite', accounts => {
     const centaur = accounts[3];
     const human2 = accounts[4];
 
-    describe.skip('main', () => {
+    describe('main', () => {
         it('can get Ether balance for accounts', async () => {
             log(web3.eth.getBalance(aphrodite).toNumber());
             log(web3.eth.getBalance(cupid).toNumber());

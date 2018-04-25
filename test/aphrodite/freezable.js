@@ -22,7 +22,7 @@ contract('Aphrodite', accounts => {
     const centaur = accounts[3];
     const human2 = accounts[4];
 
-    describe.skip('freezable', () => {
+    describe('freezable', () => {
         it('cannot approve from a frozen account', async () => {
             const token = await Aphrodite.new();
             await token.freezeAccount(human);
