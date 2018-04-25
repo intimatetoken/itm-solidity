@@ -58,7 +58,7 @@ module.exports = {
     },
     mainnet: {
       network_id: "1",
-      gas: 7000000,
+      gas: 8000000,
       gasPrice: 100000000000, // 100 gwei
       provider() {
         var ledgerOptions = {
