@@ -23,6 +23,7 @@
   "devDependencies": {
     "bluebird": "^3.5.1",
     "ganache-cli": "^6.1.0",
-    "truffle": "^4.1.5"
+    "truffle": "^4.1.5",
+    "truffle-ledger-provider": "^0.0.1"
   }
 }

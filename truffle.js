@@ -4,6 +4,7 @@ require('eth-gas-reporter')
 
 const ganache = require("ganache-cli")
 const HDWalletProvider = require("truffle-hdwallet-provider")
+const LedgerWalletProvider = require("truffle-ledger-provider")
 
 let mnemonic = process.env.MNEMONIC
 let infuraAccessToken = process.env.INFURA_ACCESS_TOKEN
@@ -26,8 +27,13 @@ module.exports = {
       network_id: 3,
       gas: 4600000,
       provider() {
-        return new HDWalletProvider(mnemonic, `https://ropsten.infura.io/${infuraAccessToken}`)
-      },
+        var ledgerOptions = {
+          networkId: 3,
+          accountsOffset: 0
+        }
+        
+        return new LedgerWalletProvider(ledgerOptions, `https://ropsten.infura.io/${infuraAccessToken}`)
+      }
     },
     kovan: {
       network_id: 42,
@@ -50,11 +56,17 @@ module.exports = {
       test: true,
     },
     mainnet: {
-      host: "wall",
-      port: 8545,
-      network_id: "1", // Match mainnet
+      network_id: "1",
       gas: 7000000,
-      gasPrice: 1e9
+      gasPrice: 1e9,
+      provider() {
+        var ledgerOptions = {
+          networkId: 1,
+          accountsOffset: 0
+        }
+
+        return new LedgerWalletProvider(ledgerOptions, `https://mainnet.infura.io/${infuraAccessToken}`)
+      }
     }
   },
   mocha: {
