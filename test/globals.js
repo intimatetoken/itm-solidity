@@ -10,10 +10,11 @@
 
 'use strict';
 
+const bluebird = require('bluebird')
 const sha3 = require('solidity-sha3').default;
 
-const latestTime = () => {
-    return web3.eth.getBlock('latest').timestamp;
+const latestTime = async () => {
+    return (await bluebird.promisify(web3.eth.getBlock)('latest')).timestamp
 };
 
 const increaseTime = addSeconds => web3.currentProvider.send({ jsonrpc: "2.0", method: "evm_increaseTime", params: [addSeconds], id: 0 });
@@ -23,12 +24,20 @@ module.exports = {
     CUPID: sha3('Aphrodite\'s Little Helper.'),
     BULKTRANSFER: sha3('Bulk Transfer User.'),
 
-    log: () => {},
+    log: console.log,
 
     assertRevert: function (error) {
         if (error.message.search('revert') == -1) {
             assert.fail('Call expected to revert; error was ' + error);
         }
+    },
+
+    getBalance: function (addr) {
+        return bluebird.promisify(web3.eth.getBalance)(addr)
+    },
+
+    sendTransaction: function (obj) {
+        return bluebird.promisify(web3.eth.sendTransaction)(obj)
     },
 
     vestingFunds: '0xDeededBabeCafe',
