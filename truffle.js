@@ -28,12 +28,13 @@ module.exports = {
       gas: 4600000,
       gasPrice: 100000000000, // 100 gwei
       provider() {
-        var ledgerOptions = {
-          networkId: 3,
-          accountsOffset: 0
-        }
+        // var ledgerOptions = {
+        //   networkId: 3,
+        //   accountsOffset: 0
+        // }
         
-        return new LedgerWalletProvider(ledgerOptions, `https://ropsten.infura.io/${infuraAccessToken}`)
+        // return new LedgerWalletProvider(ledgerOptions, `https://ropsten.infura.io/${infuraAccessToken}`)
+        return new HDWalletProvider(mnemonic, `https://ropsten.infura.io/${infuraAccessToken}`)
       }
     },
     kovan: {
@@ -58,16 +59,16 @@ module.exports = {
     },
     mainnet: {
       network_id: "1",
-      gas: 7990000,
-      gasPrice: 100000000000, // 100 gwei
+      gas: 2500000,
+      gasPrice: 10000000000, // 10 gwei
       provider() {
-        var ledgerOptions = {
-          networkId: 1,
-          accountsOffset: 0
-        }
+        // var ledgerOptions = {
+        //   networkId: 1,
+        //   accountsOffset: 0
+        // }
 
-        return new LedgerWalletProvider(ledgerOptions, `https://mainnet.infura.io/${infuraAccessToken}`)
-        // return new HDWalletProvider(mnemonic, `https://mainnet.infura.io/${infuraAccessToken}`)
+        // return new LedgerWalletProvider(ledgerOptions, `https://mainnet.infura.io/${infuraAccessToken}`)
+        return new HDWalletProvider(mnemonic, `https://mainnet.infura.io/${infuraAccessToken}`)
       }
     }
   },
